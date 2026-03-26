@@ -17,6 +17,7 @@ def main():
     LARGEUR = 800
     HAUTEUR = 600
     rect_x = 10
+    
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
     fenetre.fill(WHITE)   # Fond blanc (RGB)
@@ -37,10 +38,11 @@ def main():
                 rect_x += 5
 
 
+
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
         pygame.draw.rect( fenetre, BLUE ,(rect_x, 10, 10, 10))
-        pygame.display.update()           # Rafraichissement de l'ecran
+        pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
 
