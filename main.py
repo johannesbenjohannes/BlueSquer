@@ -34,13 +34,13 @@ def main():
                 sys.exit()
         touches = pygame.key.get_pressed()
         if touches[pygame.K_LEFT]:
-            rect_x -= 5
+            rect_x -= 3
         if touches[pygame.K_RIGHT]:
-            rect_x += 5
+            rect_x += 3
         if touches[pygame.K_DOWN]:
-            rect_y+=5
+            rect_y+=3
         if touches[pygame.K_UP]:
-            rect_y-=5
+            rect_y-=3
 
 
 
