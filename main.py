@@ -1,5 +1,6 @@
 import pygame
 import sys
+from math import sqrt
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -10,6 +11,8 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+
+speed = 3
 
 
 def main():
@@ -33,14 +36,30 @@ def main():
                 pygame.quit()
                 sys.exit()
         touches = pygame.key.get_pressed()
-        if touches[pygame.K_LEFT]:
-            rect_x -= 3
-        if touches[pygame.K_RIGHT]:
-            rect_x += 3
-        if touches[pygame.K_DOWN]:
-            rect_y+=3
-        if touches[pygame.K_UP]:
-            rect_y-=3
+        if touches[pygame.K_LEFT] and touches[pygame.K_DOWN]:
+            rect_x -= speed/2
+            rect_y += speed/2 
+        elif touches[pygame.K_LEFT] and touches[pygame.K_UP]:
+            print("shatta run di place and guess who a bring it up")
+            rect_x -= speed/2   
+            rect_y -= speed/2
+        elif touches[pygame.K_RIGHT] and touches[pygame.K_UP]:
+            print("shatta run di place and guess who a bring it up")
+            rect_x += speed/2   
+            rect_y -= speed/2
+        elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN]:
+            print("shatta run di place and guess who a bring it up")
+            rect_x += speed/2   
+            rect_y += speed/2
+        
+        elif touches[pygame.K_LEFT]:
+            rect_x -= speed
+        elif touches[pygame.K_RIGHT]:
+            rect_x += speed
+        elif touches[pygame.K_DOWN]:
+            rect_y+= speed
+        elif touches[pygame.K_UP]:
+            rect_y-= speed
 
 
 
