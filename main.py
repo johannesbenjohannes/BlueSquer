@@ -40,15 +40,12 @@ def main():
             rect_x -= speed/2
             rect_y += speed/2 
         elif touches[pygame.K_LEFT] and touches[pygame.K_UP]:
-            print("shatta run di place and guess who a bring it up")
             rect_x -= speed/2   
             rect_y -= speed/2
         elif touches[pygame.K_RIGHT] and touches[pygame.K_UP]:
-            print("shatta run di place and guess who a bring it up")
             rect_x += speed/2   
             rect_y -= speed/2
         elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN]:
-            print("shatta run di place and guess who a bring it up")
             rect_x += speed/2   
             rect_y += speed/2
         
