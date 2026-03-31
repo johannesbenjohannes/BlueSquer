@@ -1,6 +1,8 @@
 import pygame
 import sys
-from math import sqrt
+import math as m
+import random as rd
+
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -21,20 +23,27 @@ def main():
     HAUTEUR = 600
     rect_x = 10
     rect_y = 10
+    compteur = 0
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
     fenetre.fill(WHITE)   # Fond blanc (RGB)
 
+    drawline = False
    
     # --- 2. Boucle principale ---
     while True:
+        compteur+=1
+        if compteur%120==0: 
+            drawline = True
+            
 
         # --- 3. Gestion des events ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+                
         touches = pygame.key.get_pressed()
         if touches[pygame.K_LEFT] and touches[pygame.K_DOWN]:
             rect_x -= speed/2
@@ -57,6 +66,8 @@ def main():
             rect_y+= speed
         elif touches[pygame.K_UP]:
             rect_y-= speed
+            
+        
 
 
 
@@ -64,7 +75,16 @@ def main():
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
         pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
-        pygame.draw.circle(fenetre, BLUE,(rect_x+5, rect_y+5,), 200,1)
+        pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+        
+        if drawline:
+            rdTheta= rd.uniform(0, 2*m.pi)
+            attack_x = rect_x+200*m.cos(rdTheta)
+            attack_y = rect_y+200*m.sin(rdTheta)
+            pygame.draw.line(fenetre, RED,(attack_x, attack_y),(rect_x+5, rect_y+5),5)
+
+            drawline = False
+
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
