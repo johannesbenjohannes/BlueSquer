@@ -22,6 +22,14 @@ def main():
     LARGEUR = 800
     HAUTEUR = 600
     rect_x = 10
+    HAUTEUR = 600
+    rect_x = 10
+    rect_y = 10
+    compteur = 0
+
+    
+    fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
+    pygame.display.set_caption("Premier projet pygame")
     rect_y = 10
     compteur = 0
     
@@ -81,9 +89,10 @@ def main():
             rdTheta= rd.uniform(0, 2*m.pi)
             attack_x = rect_x+200*m.cos(rdTheta)
             attack_y = rect_y+200*m.sin(rdTheta)
-            pygame.draw.line(fenetre, RED,(attack_x, attack_y),(rect_x+5, rect_y+5),5)
+            for i in range(10):
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(rect_x+5, rect_y+5),i)
 
-            drawline = False
+            
 
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
