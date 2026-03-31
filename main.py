@@ -21,11 +21,12 @@ def main():
 
     LARGEUR = 800
     HAUTEUR = 600
-    rect_x = 10
     HAUTEUR = 600
     rect_x = 10
     rect_y = 10
     compteur = 0
+    attacking = False
+    alive = True
 
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
@@ -82,15 +83,22 @@ def main():
 
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
-        pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
-        pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-        
-        if drawline:
-            rdTheta= rd.uniform(0, 2*m.pi)
-            attack_x = rect_x+200*m.cos(rdTheta)
-            attack_y = rect_y+200*m.sin(rdTheta)
-            for i in range(10):
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(rect_x+5, rect_y+5),i)
+        if alive:
+            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            
+            if drawline:
+                if attacking ==False:
+                    end_x = rect_x+5
+                    end_y = rect_y+5
+                    rdTheta= rd.uniform(0, 2*m.pi)
+                    attack_x = rect_x+200*m.cos(rdTheta)
+                    attack_y = rect_y+200*m.sin(rdTheta)
+
+                attacking = True
+                for i in range(1,60000):
+                    pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(i/1000))
+
 
             
 
