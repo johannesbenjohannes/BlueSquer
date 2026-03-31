@@ -64,6 +64,7 @@ def main():
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
         pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+        pygame.draw.circle(fenetre, BLUE,(rect_x+5, rect_y+5,), 200,1)
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
