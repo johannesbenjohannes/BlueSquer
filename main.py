@@ -46,10 +46,10 @@ def main():
     # --- 2. Boucle principale ---
     while True:
         compteur+=1
-        if compteur%30==0: 
+        if compteur%60==0: 
             drawline = True
         if attacking:
-            compteur_attaque+=1
+            compteur_attaque+=0.25
             
 
         # --- 3. Gestion des events ---
@@ -95,15 +95,15 @@ def main():
             if drawline:
                 round_compteur=True
                 if attacking ==False:
-                    end_x = rect_x+5
-                    end_y = rect_y+5
                     rdTheta= rd.uniform(0, 2*m.pi)
-                    attack_x = rect_x+200*m.cos(rdTheta)
-                    attack_y = rect_y+200*m.sin(rdTheta)
+                    attack_x = rect_x+2000*m.cos(rdTheta)
+                    attack_y = rect_y+2000*m.sin(rdTheta)
+                    end_x = rect_x+2000*m.cos(rdTheta+m.pi)
+                    end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 attacking = True
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),width=compteur_attaque%10)
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
                 if compteur_attaque%10==9:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),width=compteur_attaque%10)
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
                     drawline=False
                     attacking=False
                     compteur_attaque = 0
