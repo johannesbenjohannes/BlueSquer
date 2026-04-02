@@ -2,6 +2,7 @@ import pygame
 import sys
 import math as m
 import random as rd
+import time as t
 
 
 # --- 1. Initialisation ---
@@ -21,11 +22,14 @@ def main():
 
     LARGEUR = 800
     HAUTEUR = 600
-    rect_x = 10
-    HAUTEUR = 600
+  
     rect_x = 10
     rect_y = 10
     compteur = 0
+    attacking = False
+    alive = True
+    compteur_attaque=0
+
 
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
@@ -42,8 +46,10 @@ def main():
     # --- 2. Boucle principale ---
     while True:
         compteur+=1
-        if compteur%120==0: 
+        if compteur%30==0: 
             drawline = True
+        if attacking:
+            compteur_attaque+=1
             
 
         # --- 3. Gestion des events ---
@@ -82,15 +88,26 @@ def main():
 
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
-        pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
-        pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-        
-        if drawline:
-            rdTheta= rd.uniform(0, 2*m.pi)
-            attack_x = rect_x+200*m.cos(rdTheta)
-            attack_y = rect_y+200*m.sin(rdTheta)
-            for i in range(10):
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(rect_x+5, rect_y+5),i)
+        if alive:
+            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            
+            if drawline:
+                round_compteur=True
+                if attacking ==False:
+                    end_x = rect_x+5
+                    end_y = rect_y+5
+                    rdTheta= rd.uniform(0, 2*m.pi)
+                    attack_x = rect_x+200*m.cos(rdTheta)
+                    attack_y = rect_y+200*m.sin(rdTheta)
+                attacking = True
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),width=compteur_attaque%10)
+                if compteur_attaque%10==9:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),width=compteur_attaque%10)
+                    drawline=False
+                    attacking=False
+                    compteur_attaque = 0
+
 
             
 
