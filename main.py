@@ -29,6 +29,8 @@ def main():
     attacking = False
     alive = True
     compteur_attaque=0
+    has_dashed = False
+    compteur_dash=600
 
 
     
@@ -50,6 +52,10 @@ def main():
             drawline = True
         if attacking:
             compteur_attaque+=0.25
+        if has_dashed :
+            compteur_dash+=1
+        global speed
+
             
 
         # --- 3. Gestion des events ---
@@ -80,7 +86,23 @@ def main():
             rect_y+= speed
         elif touches[pygame.K_UP]:
             rect_y-= speed
+
+        if touches[pygame.K_SPACE]:
+            if compteur_dash==600:
+                    has_dashed= True
+                    compteur_dash = 0
+                    speed = 13
+                   
             
+        if has_dashed:
+            if compteur_dash>7:
+                    speed = 3
+        if has_dashed ==True:
+            if compteur_dash==600:
+                has_dashed=False
+
+
+               
         
 
 
@@ -91,14 +113,14 @@ def main():
         if alive:
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            
+            pygame.draw.rect(fenetre, BLUE,(50,50,round(compteur_dash/10),50))
+            pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
             if drawline:
-                round_compteur=True
                 if attacking ==False:
                     rdTheta= rd.uniform(0, 2*m.pi)
                     attack_x = rect_x+2000*m.cos(rdTheta)
                     attack_y = rect_y+2000*m.sin(rdTheta)
-                    end_x = rect_x+2000*m.cos(rdTheta+m.pi)
+                    end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 attacking = True
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
