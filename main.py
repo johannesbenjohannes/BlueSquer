@@ -31,6 +31,8 @@ def main():
     compteur_attaque=0
     has_dashed = False
     compteur_dash=600
+    Ispattern_ligne=False
+    attaques = 0
 
 
     
@@ -44,11 +46,22 @@ def main():
     fenetre.fill(WHITE)   # Fond blanc (RGB)
 
     drawline = False
-   
+    def pattern_ligne(nb_attaques):
+        Ispattern_ligne = True
+        attaques = 0
+        if attaques == nb_attaques:
+            Ispattern_ligne
+            return
+
+
+
+
+    
+
     # --- 2. Boucle principale ---
     while True:
         compteur+=1
-        if compteur%60==0: 
+        if compteur%60==0 or Ispattern_ligne: 
             drawline = True
         if attacking:
             compteur_attaque+=0.25
@@ -129,6 +142,7 @@ def main():
                     drawline=False
                     attacking=False
                     compteur_attaque = 0
+                    attaques+=1
 
 
             
