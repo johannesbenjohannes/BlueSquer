@@ -52,6 +52,11 @@ def main():
         if attaques == nb_attaques:
             Ispattern_ligne
             return
+    def phase(phase):
+        if phase ==1:
+            patternes=[pattern_ligne]
+            patternes[rd.randint(0,1)](10)
+
 
 
 
