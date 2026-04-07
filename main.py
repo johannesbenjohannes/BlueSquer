@@ -78,8 +78,8 @@ def main():
         compteur+=1
         if compteur%60==0 and Ispattern_ligne: 
             drawline = True
-        if compteur%30==0 and Ispattern_cercle:
-            drawcricle = True
+        if compteur%5==0 and Ispattern_cercle:
+            drawcircle = True
         if attacking:
             compteur_attaque+=0.25
         if has_dashed :
@@ -163,8 +163,8 @@ def main():
 
             if drawcircle:
                 if attacking == False:
-                    attack_x = rect_x
-                    attack_y = rect_y
+                    attack_x = rect_x +5
+                    attack_y = rect_y+5
                 attacking = True
                 pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque%50))
                 if compteur_attaque%10 == 9:
