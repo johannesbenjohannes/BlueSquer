@@ -33,6 +33,8 @@ def main():
     compteur_dash=600
     Ispattern_ligne=False
     attaques = 0
+    Ispattern_cercle=True
+    drawcircle = False
 
 
     
@@ -49,12 +51,20 @@ def main():
     def pattern_ligne(nb_attaques):
         Ispattern_ligne = True
         attaques = 0
-        if attaques == nb_attaques:
-            Ispattern_ligne
+        if attaques == nb_attaques*1.5:
+            Ispattern_ligne = False
             return
-    def phase(phase):
+    def pattern_cercle(nb_attaques):
+        Ispattern_cercle = True
+        attaques = 0
+        if attaques == nb_attaques*2:
+            Ispattern_cercle = False
+            return
+
+        
+    def phase(nb_phase):
         if phase ==1:
-            patternes=[pattern_ligne]
+            patternes=[pattern_ligne, pattern_cercle]
             patternes[rd.randint(0,1)](10)
 
 
@@ -66,8 +76,10 @@ def main():
     # --- 2. Boucle principale ---
     while True:
         compteur+=1
-        if compteur%60==0 or Ispattern_ligne: 
+        if compteur%60==0 and Ispattern_ligne: 
             drawline = True
+        if compteur%30==0 and Ispattern_cercle:
+            drawcricle = True
         if attacking:
             compteur_attaque+=0.25
         if has_dashed :
@@ -149,6 +161,18 @@ def main():
                     compteur_attaque = 0
                     attaques+=1
 
+            if drawcircle:
+                if attacking == False:
+                    attack_x = rect_x
+                    attack_y = rect_y
+                attacking = True
+                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque%50))
+                if compteur_attaque%10 == 9:
+                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque%50))
+                    drawcircle = False
+                    attacking = False
+                    compteur_attaque = 0
+                    attaques+=1
 
             
 
