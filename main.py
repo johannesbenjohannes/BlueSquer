@@ -60,7 +60,6 @@ def main():
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
     fenetre.fill(WHITE) # Fond blanc (RGB)
-
     
     def pattern_ligne(nb_attaques): # Lancer le pattern ligne
         global ispattern_ligne
@@ -72,11 +71,10 @@ def main():
     def pattern_cercle(nb_attaques): # Lancer le pattern cerclke
         global ispattern_cercle
         ispattern_cercle = True
-        attaques_cercle = 0
+        attaques_cercle = 0 
         if attaques_cercle == nb_attaques*2:
             ispattern_cercle = False
             return
-
         
     def phase(nb_phase): # Lancer le comportement associé à sa phase
         if nb_phase == 1:
@@ -138,13 +136,10 @@ def main():
         if has_dashed ==True:
             if compteur_dash==600:
                 has_dashed=False
-<<<<<<< HEAD
         
         
-=======
->>>>>>> a098841c34c9c92741532310bb5f2a6c68ae9702
 
-        # --- Mise a jour de l'affichage --- 
+        # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
         fenetre.fill(WHITE)
         if alive:
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
