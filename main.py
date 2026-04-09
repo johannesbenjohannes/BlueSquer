@@ -6,6 +6,8 @@ import random as rd
 # --- 1. Initialisation ---
 pygame.init()
 clock = pygame.time.Clock()
+pygame.font.init()
+base_font=pygame.font.SysFont('Comic Sans MS', 30)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -89,26 +91,26 @@ def main():
                 sys.exit()
                 
         touches = pygame.key.get_pressed()
-        if touches[pygame.K_LEFT] and touches[pygame.K_DOWN]:
+        if touches[pygame.K_LEFT] and touches[pygame.K_DOWN] and rect_x > 0 and rect_y < 590:
             rect_x -= speed/2
             rect_y += speed/2 
-        elif touches[pygame.K_LEFT] and touches[pygame.K_UP]:
+        elif touches[pygame.K_LEFT] and touches[pygame.K_UP] and rect_x > 0 and rect_y > 0:
             rect_x -= speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_UP]:
+        elif touches[pygame.K_RIGHT] and touches[pygame.K_UP] and rect_x < 790 and rect_y > 0:
             rect_x += speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN]:
+        elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN] and rect_x < 790 and rect_y < 590:
             rect_x += speed/2   
             rect_y += speed/2
         
-        elif touches[pygame.K_LEFT]:
+        elif touches[pygame.K_LEFT] and rect_x > 0:
             rect_x -= speed
-        elif touches[pygame.K_RIGHT]:
+        elif touches[pygame.K_RIGHT] and rect_x < 790:
             rect_x += speed
-        elif touches[pygame.K_DOWN]:
+        elif touches[pygame.K_DOWN] and rect_y < 590:
             rect_y+= speed
-        elif touches[pygame.K_UP]:
+        elif touches[pygame.K_UP] and rect_y > 0:
             rect_y-= speed
 
         if touches[pygame.K_SPACE]:
@@ -124,13 +126,8 @@ def main():
         if has_dashed ==True:
             if compteur_dash==600:
                 has_dashed=False
-
-
-               
         
-
-
-
+        
 
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
@@ -139,6 +136,15 @@ def main():
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             pygame.draw.rect(fenetre, BLUE,(50,50,round(compteur_dash/10),50))
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
+            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
+            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
+            if current_color == RED:
+                text_dead=base_font.render(f"dead: True", False, (0,0,0))
+            else:
+                text_dead=base_font.render(f"dead: False", False, (0,0,0))
+            fenetre.blit(text_dead, (2,2))
+
+
             if drawline:
                 if line_attacking ==False:
                     rdTheta= rd.uniform(0, 2*m.pi)
@@ -166,7 +172,10 @@ def main():
                     drawcircle = False
                     circle_attacking = False
                     compteur_attaque_cercle = 0
-                    attaques_cercle+=1
+        if alive:
+            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            attaques_cercle+=1
 
             
 
