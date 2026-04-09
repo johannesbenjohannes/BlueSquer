@@ -53,7 +53,7 @@ def main():
             self.x = x
             self.y = y
             self.target_x = target_x
-            self.target_y = y
+            self.target_y = target_y
             self.velocity = velocity
         
 
@@ -94,7 +94,7 @@ def main():
         if has_dashed :
             compteur_dash+=1
         global speed
-
+    
         # --- 3. Gestion des events ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -171,7 +171,7 @@ def main():
 
             if drawcircle:
                 if circle_attacking == False:
-                    attack_x = rect_x +5
+                    attack_x = rect_x+5
                     attack_y = rect_y+5
                 circle_attacking = True
                 pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque_cercle))
