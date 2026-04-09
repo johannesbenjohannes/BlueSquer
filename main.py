@@ -138,11 +138,8 @@ def main():
         if has_dashed ==True:
             if compteur_dash==600:
                 has_dashed=False
-<<<<<<< HEAD
         
         
-=======
->>>>>>> a098841c34c9c92741532310bb5f2a6c68ae9702
 
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
