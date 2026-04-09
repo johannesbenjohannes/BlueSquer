@@ -2,8 +2,6 @@ import pygame
 import sys
 import math as m
 import random as rd
-import time as t
-
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -20,28 +18,21 @@ speed = 3
 
 def main():
 
-    LARGEUR = 800
-    HAUTEUR = 600
+    LARGEUR = 800 # Largeur de la fenêtre
+    HAUTEUR = 600 # Hauteur de la frenêtre
   
     rect_x = 10
     rect_y = 10
-    compteur = 0
-    attacking = False
-    alive = True
-    compteur_attaque=0
-    has_dashed = False
-    compteur_dash=600
-    Ispattern_ligne=False
-    attaques = 0
-    Ispattern_cercle=True
-    drawcircle = False
-
-
-    
-    fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
-    pygame.display.set_caption("Premier projet pygame")
-    rect_y = 10
-    compteur = 0
+    compteur = 0 # Compteur global des ticks
+    line_attacking = False # Etat d'attaque de ligne FIXME
+    alive = True # Etat du player
+    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne FIXME
+    has_dashed = False # Etat du dash
+    compteur_dash = 600 # Cooldown du dash
+    Ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
+    attaques = 0 # Compteur des attaques FIXME
+    Ispattern_cercle=True # Est-ce que le pattern en cours est le cercle ?
+    drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
@@ -80,8 +71,8 @@ def main():
             drawline = True
         if compteur%5==0 and Ispattern_cercle:
             drawcircle = True
-        if attacking:
-            compteur_attaque+=0.25
+        if line_attacking:
+            line_attacking+=0.25
         if has_dashed :
             compteur_dash+=1
         global speed
@@ -146,19 +137,19 @@ def main():
             pygame.draw.rect(fenetre, BLUE,(50,50,round(compteur_dash/10),50))
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
             if drawline:
-                if attacking ==False:
+                if line_attacking ==False:
                     rdTheta= rd.uniform(0, 2*m.pi)
                     attack_x = rect_x+2000*m.cos(rdTheta)
                     attack_y = rect_y+2000*m.sin(rdTheta)
                     end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
-                attacking = True
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
-                if compteur_attaque%10==9:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
+                line_attacking = True
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
+                if line_attacking%10==9:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
                     drawline=False
-                    attacking=False
-                    compteur_attaque = 0
+                    line_attacking=False
+                    compteur_attaque_ligne = 0
                     attaques+=1
 
             if drawcircle:
