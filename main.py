@@ -24,14 +24,17 @@ def main():
     rect_x = 10
     rect_y = 10
     compteur = 0 # Compteur global des ticks
-    line_attacking = False # Etat d'attaque de ligne FIXME
+    line_attacking = False # Etat d'attaque de ligne 
+    circle_attacking = False #Etat d'attaque de cercle
     alive = True # Etat du player
-    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne FIXME
+    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la ligne
     has_dashed = False # Etat du dash
     compteur_dash = 600 # Cooldown du dash
     Ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
-    attaques = 0 # Compteur des attaques FIXME
-    Ispattern_cercle=True # Est-ce que le pattern en cours est le cercle ?
+    attaques_ligne = 0 # Compteur des attaques  ligne 
+    attaques_cercle = 0 #compteur des attaques cercle
+    Ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
     drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
@@ -41,14 +44,14 @@ def main():
     drawline = False
     def pattern_ligne(nb_attaques):
         Ispattern_ligne = True
-        attaques = 0
-        if attaques == nb_attaques*1.5:
+        attaques_ligne = 0
+        if attaques_ligne == nb_attaques*1.5:
             Ispattern_ligne = False
             return
     def pattern_cercle(nb_attaques):
         Ispattern_cercle = True
-        attaques = 0
-        if attaques == nb_attaques*2:
+        attaques_cercle = 0
+        if attaques_cercle == nb_attaques*2:
             Ispattern_cercle = False
             return
 
@@ -150,20 +153,20 @@ def main():
                     drawline=False
                     line_attacking=False
                     compteur_attaque_ligne = 0
-                    attaques+=1
+                    attaques_ligne+=1
 
             if drawcircle:
-                if attacking == False:
+                if circle_attacking == False:
                     attack_x = rect_x +5
                     attack_y = rect_y+5
-                attacking = True
-                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque))
-                if compteur_attaque == 9:
-                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque))
+                circle_attacking = True
+                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque_cercle))
+                if compteur_attaque_cercle == 9:
+                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque_cercle))
                     drawcircle = False
-                    attacking = False
-                    compteur_attaque = 0
-                    attaques+=1
+                    circle_attacking = False
+                    compteur_attaque_cercle = 0
+                    attaques_cercle+=1
 
             
 
