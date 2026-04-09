@@ -9,20 +9,19 @@ clock = pygame.time.Clock()
 pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-
-speed = 3
-
-
 def main():
+
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 0, 255)
+
+    speed = 3
 
     LARGEUR = 800 # Largeur de la fenêtre
     HAUTEUR = 600 # Hauteur de la frenêtre
-  
+    
     rect_x = 10
     rect_y = 10
 
@@ -44,10 +43,9 @@ def main():
 
     attaques_ligne = 0 # Compteur des attaques  ligne 
     attaques_cercle = 0 #compteur des attaques cercle
-
     drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
     drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
-    
+
     class BossBullet: # Classe pour les projectiles du boss
         def __init__(self, x, y, target_x, target_y, velocity=5):
             self.x = x
@@ -55,45 +53,17 @@ def main():
             self.target_x = target_x
             self.target_y = y
             self.velocity = velocity
-        
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
     fenetre.fill(WHITE) # Fond blanc (RGB)
-    
-    def pattern_ligne(nb_attaques): # Lancer le pattern ligne
-        global ispattern_ligne
-        ispattern_ligne = True
-        attaques_ligne = 0
-        if attaques_ligne == nb_attaques*1.5:
-            ispattern_ligne = False
-            return
-    def pattern_cercle(nb_attaques): # Lancer le pattern cerclke
-        global ispattern_cercle
-        ispattern_cercle = True
-        attaques_cercle = 0 
-        if attaques_cercle == nb_attaques*2:
-            ispattern_cercle = False
-            return
-        
-    def phase(nb_phase): # Lancer le comportement associé à sa phase
-        if nb_phase == 1:
-            patternes=[pattern_ligne, pattern_cercle]
-            patternes[rd.randint(0,1)](10)
-    pattern_ligne(10)
 
     # --- 2. Boucle principale ---
     while True:
-        compteur+=1
-        if compteur%60==0 and ispattern_ligne: 
-            drawline = True
-        if compteur%5==0 and ispattern_cercle:
-            drawcircle = True
-        if line_attacking:
-            line_attacking+=0.25
-        if has_dashed :
-            compteur_dash+=1
-        global speed
+
+        compteur+=1 # CHECKS DU LANCEMENT DU PATTERN
+        
+        
 
         # --- 3. Gestion des events ---
         for event in pygame.event.get():
@@ -152,6 +122,33 @@ def main():
                 text_dead=base_font.render(f"dead: False", False, (0,0,0))
             fenetre.blit(text_dead, (2,2))
 
+            # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
+            # POUR L'INSTANT; que le check du pattern ligne
+            ispattern_ligne = True
+            attaques_ligne = 0
+            if attaques_ligne == 10*1.5:
+                ispattern_ligne = False
+                    
+            
+            """      
+            def phase(nb_phase): # Lancer le comportement associé à sa phase
+                
+                
+                if nb_phase == 1:
+                    patternes=[pattern_ligne, pattern_cercle]
+                    patternes[rd.randint(0,1)](10)
+            """
+            # FIN DE LA ZONE INTERDITE
+
+            if compteur%60 == 0 and ispattern_ligne: 
+                drawline = True
+            if compteur%5==0 and ispattern_cercle:
+                drawcircle = True
+
+            if line_attacking:
+                compteur_attaque_ligne+=0.25
+            if has_dashed :
+                compteur_dash+=1
 
             if drawline:
                 if line_attacking == False:
@@ -161,8 +158,9 @@ def main():
                     end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 line_attacking = True
+                
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
-                if line_attacking%10 == 9:
+                if compteur_attaque_ligne%50 == 9:
                     pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
                     drawline=False
                     line_attacking=False
@@ -183,11 +181,19 @@ def main():
         if alive:
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            attaques_cercle+=1
-
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
+
+
+"""      
+def phase(nb_phase): # Lancer le comportement associé à sa phase
+    
+    
+    if nb_phase == 1:
+        patternes=[pattern_ligne, pattern_cercle]
+        patternes[rd.randint(0,1)](10)
+    """
 
 if __name__=="__main__":
     main()
