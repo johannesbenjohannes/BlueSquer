@@ -136,8 +136,6 @@ def main():
         if has_dashed ==True:
             if compteur_dash==600:
                 has_dashed=False
-        
-        
 
         # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
         fenetre.fill(WHITE)
