@@ -61,12 +61,6 @@ def main():
             patternes=[pattern_ligne, pattern_cercle]
             patternes[rd.randint(0,1)](10)
 
-
-
-
-
-    
-
     # --- 2. Boucle principale ---
     while True:
         compteur+=1
@@ -79,8 +73,6 @@ def main():
         if has_dashed :
             compteur_dash+=1
         global speed
-
-            
 
         # --- 3. Gestion des events ---
         for event in pygame.event.get():
@@ -116,21 +108,13 @@ def main():
                     has_dashed= True
                     compteur_dash = 0
                     speed = 13
-                   
-            
+           
         if has_dashed:
             if compteur_dash>7:
                     speed = 3
         if has_dashed ==True:
             if compteur_dash==600:
                 has_dashed=False
-
-
-               
-        
-
-
-
 
         # --- Mise a jour de l'affichage --- 
         fenetre.fill(WHITE)
@@ -167,8 +151,6 @@ def main():
                     circle_attacking = False
                     compteur_attaque_cercle = 0
                     attaques_cercle+=1
-
-            
 
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
