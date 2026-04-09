@@ -160,11 +160,7 @@ def main():
                 line_attacking = True
                 
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
-<<<<<<< HEAD
-                if compteur_attaque_ligne%10 == 9:
-=======
                 if compteur_attaque_ligne%50 == 9:
->>>>>>> 8855136f0969ed02fd9f8e06089d7f9273fe2ace
                     pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
                     drawline=False
                     line_attacking=False
