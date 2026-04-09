@@ -162,7 +162,7 @@ def main():
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 line_attacking = True
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
-                if line_attacking%10 == 9:
+                if compteur_attaque_ligne%10 == 9:
                     pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
                     drawline=False
                     line_attacking=False
@@ -180,7 +180,7 @@ def main():
                     drawcircle = False
                     circle_attacking = False
                     compteur_attaque_cercle = 0
-        if alive:
+        
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             attaques_cercle+=1
