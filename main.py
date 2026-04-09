@@ -166,9 +166,9 @@ def main():
                     attack_x = rect_x +5
                     attack_y = rect_y+5
                 attacking = True
-                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque%50))
-                if compteur_attaque%10 == 9:
-                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque%50))
+                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque))
+                if compteur_attaque == 9:
+                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque))
                     drawcircle = False
                     attacking = False
                     compteur_attaque = 0
