@@ -81,17 +81,36 @@ def main():
 
     mouse_x = 0 #Abscisse de la souri
     mouse_y = 0 #Ordonnée de la souri
-    start_pos = Vector2(mouse_x,mouse_y)
+    projectile_active = False
 
     class Bullet: # Classe pour les projectiles
-        def __init__(self, x, y, target_x, target_y, nature, velocity=5) :
+        def __init__(self, x, y, target_x, target_y, velocity=5) :
             self.x = x
             self.y = y
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
-            nature = nature
+<<<<<<< HEAD
+            self.nature = nature
+=======
+>>>>>>> ca418aa5cd103fcef6b27b6a99505769046f3915
 
+    class CircleAttack:
+        circles=[]
+        def __init__(self,x,y,t):
+            self.x = x
+            self.y = y
+            self.t = t
+            self.r = 0
+            self.color = GREEN
+        def draw(self):
+            pass
+
+        def update(self):
+            if self.t == 36:
+                self.color = RED
+            if self.t % 4:
+                self.r += 1
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
@@ -111,26 +130,25 @@ def main():
                 sys.exit()
                 
         touches = pygame.key.get_pressed()
-        if touches[pygame.K_LEFT] and touches[pygame.K_DOWN] and rect_x > 0 and rect_y < 590:
+        if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
             rect_x -= speed/2
             rect_y += speed/2 
-        elif touches[pygame.K_LEFT] and touches[pygame.K_UP] and rect_x > 0 and rect_y > 0:
+        elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
             rect_x -= speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_UP] and rect_x < 790 and rect_y > 0:
+        elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 790 and rect_y > 0:
             rect_x += speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN] and rect_x < 790 and rect_y < 590:
+        elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 790 and rect_y < 590:
             rect_x += speed/2   
             rect_y += speed/2
-        
-        elif touches[pygame.K_LEFT] and rect_x > 0:
+        elif touches[pygame.K_q] and rect_x > 0:
             rect_x -= speed
-        elif touches[pygame.K_RIGHT] and rect_x < 790:
+        elif touches[pygame.K_d] and rect_x < 790:
             rect_x += speed
-        elif touches[pygame.K_DOWN] and rect_y < 590:
+        elif touches[pygame.K_s] and rect_y < 590:
             rect_y+= speed
-        elif touches[pygame.K_UP] and rect_y > 0:
+        elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
 
         if touches[pygame.K_SPACE]:
@@ -237,8 +255,9 @@ def main():
                 text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
             fenetre.blit(text_color, (2,2))
-
-            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
+            fenetre.blit(text_ticks, (700, 2))
+            pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             
         pygame.display.flip()           # Rafraichissement de l'ecran
