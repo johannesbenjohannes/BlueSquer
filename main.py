@@ -68,8 +68,24 @@ def main():
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
-            nature = nature
+            self.nature = nature
 
+    class CircleAttack:
+        circles=[]
+        def __init__(self,x,y,t):
+            self.x = x
+            self.y = y
+            self.t = t
+            self.r = 0
+            self.color = GREEN
+        def draw(self):
+            pass
+
+        def update(self):
+            if self.t == 36:
+                self.color = RED
+            if self.t % 4:
+                self.r += 1
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
@@ -89,26 +105,25 @@ def main():
                 sys.exit()
                 
         touches = pygame.key.get_pressed()
-        if touches[pygame.K_LEFT] and touches[pygame.K_DOWN] and rect_x > 0 and rect_y < 590:
+        if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
             rect_x -= speed/2
             rect_y += speed/2 
-        elif touches[pygame.K_LEFT] and touches[pygame.K_UP] and rect_x > 0 and rect_y > 0:
+        elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
             rect_x -= speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_UP] and rect_x < 790 and rect_y > 0:
+        elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 790 and rect_y > 0:
             rect_x += speed/2   
             rect_y -= speed/2
-        elif touches[pygame.K_RIGHT] and touches[pygame.K_DOWN] and rect_x < 790 and rect_y < 590:
+        elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 790 and rect_y < 590:
             rect_x += speed/2   
             rect_y += speed/2
-        
-        elif touches[pygame.K_LEFT] and rect_x > 0:
+        elif touches[pygame.K_q] and rect_x > 0:
             rect_x -= speed
-        elif touches[pygame.K_RIGHT] and rect_x < 790:
+        elif touches[pygame.K_d] and rect_x < 790:
             rect_x += speed
-        elif touches[pygame.K_DOWN] and rect_y < 590:
+        elif touches[pygame.K_s] and rect_y < 590:
             rect_y+= speed
-        elif touches[pygame.K_UP] and rect_y > 0:
+        elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
 
         if touches[pygame.K_SPACE]:
@@ -153,7 +168,12 @@ def main():
             def phase(nb_phase): # Lancer le comportement associé à sa phase
                 
                 
-                if nb_phase == 1:
+                if nb_phase == 1:pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque_cercle))
+                if compteur_attaque_cercle == 9:
+                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque_cercle))
+                    drawcircle = False
+                    circle_attacking = False
+                    compteur_attaque_cercle = 0
                     patternes=[pattern_ligne, pattern_cercle]
                     patternes[rd.randint(0,1)](10)"/home/canard101/NSI_proj/main.py", line 212, in <module>
     main()
@@ -203,7 +223,8 @@ def main():
                     circle_attacking = False
                     compteur_attaque_cercle = 0
 
-
+            for circle in CircleAttack.circles:
+                circle.update()
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
@@ -211,8 +232,9 @@ def main():
                 text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
             fenetre.blit(text_color, (2,2))
-
-            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
+            fenetre.blit(text_ticks, (700, 2))
+            pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             
         pygame.display.flip()           # Rafraichissement de l'ecran
