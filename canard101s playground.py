@@ -100,7 +100,7 @@ def main():
         elif touches[pygame.K_RIGHT]:
             Player.move(1,0)
          
-
+ 
         elif touches[pygame.K_SPACE]:
             if not Player.jump:
                 Player.jump = True
