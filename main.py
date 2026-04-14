@@ -10,6 +10,14 @@ clock = pygame.time.Clock()
 pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
 
+def check_surrounding_pixel_colors(surface,x,y,target,n):
+    for i in range(int(x),int(x+n)):
+        for j in range(int(y),int(y+n)):
+            if surface.get_at((int(i), int(j))) == target:
+                return True
+    return False
+
+
 def main():
 
     WHITE = (255, 255, 255)
@@ -20,7 +28,9 @@ def main():
 
     speed = 3
 
-    LARGEUR = 800 # Largeur de la fenêtre
+    LARGEUR = 800 # Largeur de la 
+    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
     HAUTEUR = 600 # Hauteur de la frenêtre
     
     rect_x = 10
@@ -123,17 +133,12 @@ def main():
         # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
         fenetre.fill(WHITE)
         if alive:
+            
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             pygame.draw.rect(fenetre, BLUE,(50,50,round(compteur_dash/10),50))
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
-            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
-            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
-            if current_color == RED:
-                text_dead=base_font.render(f"dead: True", False, (0,0,0))
-            else:
-                text_dead=base_font.render(f"dead: False", False, (0,0,0))
-            fenetre.blit(text_dead, (2,2))
+
 
             # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
             # POUR L'INSTANT; que le check du pattern ligne
@@ -149,7 +154,9 @@ def main():
                 
                 if nb_phase == 1:
                     patternes=[pattern_ligne, pattern_cercle]
-                    patternes[rd.randint(0,1)](10)
+                    patternes[rd.randint(0,1)](10)"/home/canard101/NSI_proj/main.py", line 212, in <module>
+    main()
+  File "/home/canard101/NSI_proj/main.py", line 189, in
             """
             # FIN DE LA ZONE INTERDITE
 
@@ -194,8 +201,19 @@ def main():
                     drawcircle = False
                     circle_attacking = False
                     compteur_attaque_cercle = 0
-        
+
+
+            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
+            
+            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
+            if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                text_collison=base_font.render("collision", False, (0,0,0))
+                fenetre.blit(text_collison, (400,2))
+            fenetre.blit(text_color, (2,2))
+
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
+            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
