@@ -157,9 +157,31 @@ def main():
             mouse_x,mouse_y = event.pos
             
             if event.button == 1:
+<<<<<<< HEAD
                 projectile = Bullet(rect_x, rect_y, mouse_x)
 """
            
+=======
+                if projectile_active is not True :
+                    projectile = Bullet(rect_x+5, rect_y+5, mouse_x, mouse_y)
+                    bullet_pos = Vector2(projectile.x, projectile.y)
+                    start_x = projectile.x
+                    start_y = projectile.y
+                    projectile_active = True
+                    text_bullet = base_font.render(str(projectile.x), False,(0,0,0))
+                    fenetre.blit(text_bullet, (2,400))
+                    if 0<projectile.x<800 and 0<projectile.y<600 : 
+                        print(projectile_active)
+                        pygame.draw.circle(fenetre, BLACK,bullet_pos.components,5)
+                        increase_y = Vector2(start_x, projectile.target_y)
+                        increase_x = Vector2(start_y, projectile.target_x)
+                        bullet_pos += Vector2(increase_x,increase_y)
+                    projectile_active = False
+                    print("a")
+
+
+            
+>>>>>>> 0cde53afe2323704f55959d3bd74ffb3e68be931
         if has_dashed:
             if compteur_dash>7:
                     speed = 3
