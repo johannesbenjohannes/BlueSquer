@@ -90,10 +90,6 @@ def main():
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
-<<<<<<< HEAD
-            self.nature = nature
-=======
->>>>>>> ca418aa5cd103fcef6b27b6a99505769046f3915
 
     class CircleAttack:
         circles=[]
@@ -262,17 +258,6 @@ def main():
             
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
-
-
-
-"""      
-def phase(nb_phase): # Lancer le comportement associé à sa phase
-    
-    
-    if nb_phase == 1:
-        patternes=[pattern_ligne, pattern_cercle]
-        patternes[rd.randint(0,1)](10)
-    """
 
 if __name__=="__main__":
     main()
