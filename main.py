@@ -59,16 +59,15 @@ def main():
     
     mouse_x = 0 #Abscisse de la souri
     mouse_y = 0 #Ordonnée de la souri
-    start_pos = Vector2(mouse_x,mouse_y)
+    projectile_active = False
 
     class Bullet: # Classe pour les projectiles
-        def __init__(self, x, y, target_x, target_y, nature, velocity=5) :
+        def __init__(self, x, y, target_x, target_y, velocity=5) :
             self.x = x
             self.y = y
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
-            nature = nature
 
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
@@ -121,9 +120,23 @@ def main():
             mouse_x,mouse_y = event.pos
             
             if event.button == 1:
-                projectile = Bullet(rect_x, rect_y, mouse)
+                if projectile_active is not True :
+                    projectile = Bullet(rect_x+5, rect_y+5, mouse_x, mouse_y)
+                    bullet_pos = Vector2(projectile.x, projectile.y)
+                    start_x = projectile.x
+                    start_y = projectile.y
+                    projectile_active = True
+                    text_bullet = base_font.render(str(projectile.x), False,(0,0,0))
+                    fenetre.blit(text_bullet, (2,400))
+                    if 0<projectile.x<800 and 0<projectile.y<600 : 
+                        pygame.draw.circle(fenetre, BLACK,bullet_pos.components,5)
+                        increase_y = Vector2(start_x, projectile.target_y)
+                        increase_x = Vector2(start_y, projectile.target_x)
+                        bullet_pos += Vector2(increase_x,increase_y)
+                    projectile_active = False
 
-           
+
+            
         if has_dashed:
             if compteur_dash>7:
                     speed = 3
