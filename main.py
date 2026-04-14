@@ -2,7 +2,7 @@ import pygame
 import sys
 import math as m
 import random as rd
-import pyvectors  
+from pyvectors import Vector2
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -58,8 +58,8 @@ def main():
     drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
     
     mouse_x = 0 #Abscisse de la souri
-    mouxe_y = 0 #Ordonnée de la souri
-    start_pos = vector2(mouse_x,mouse_y)
+    mouse_y = 0 #Ordonnée de la souri
+    start_pos = Vector2(mouse_x,mouse_y)
 
     class Bullet: # Classe pour les projectiles
         def __init__(self, x, y, target_x, target_y, nature, velocity=5) :
@@ -121,7 +121,8 @@ def main():
             mouse_x,mouse_y = event.pos
             
             if event.button == 1:
-                while 
+                projectile = Bullet(rect_x, rect_y, mouse)
+
            
         if has_dashed:
             if compteur_dash>7:
