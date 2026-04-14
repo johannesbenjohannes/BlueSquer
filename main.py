@@ -14,6 +14,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+LIGHT_BLUE = (83,125,255)
 
 speed = 3
 
@@ -28,19 +29,16 @@ def main():
     compteur = 0
     attacking = False
     alive = True
-    compteur_attaque=0
+    compteur_attaque_ligne=0
     has_dashed = False
     compteur_dash=600
 
 
     
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
-    pygame.display.set_caption("Premier projet pygame")
+    pygame.display.set_caption("Blue Squer")
     rect_y = 10
     compteur = 0
-    
-    fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
-    pygame.display.set_caption("Premier projet pygame")
     fenetre.fill(WHITE)   # Fond blanc (RGB)
 
     drawline = False
@@ -51,7 +49,7 @@ def main():
         if compteur%60==0: 
             drawline = True
         if attacking:
-            compteur_attaque+=0.25
+            compteur_attaque_ligne+=0.25
         if has_dashed :
             compteur_dash+=1
         global speed
@@ -113,7 +111,7 @@ def main():
         if alive:
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            pygame.draw.rect(fenetre, BLUE,(50,50,round(compteur_dash/10),50))
+            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/10),50))
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
             if drawline:
                 if attacking ==False:
@@ -123,12 +121,12 @@ def main():
                     end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 attacking = True
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
-                if compteur_attaque%10==9:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque%50))
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
+                if compteur_attaque_ligne%10==9:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
                     drawline=False
                     attacking=False
-                    compteur_attaque = 0
+                    compteur_attaque_ligne = 0
 
 
             
