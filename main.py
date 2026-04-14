@@ -2,6 +2,7 @@ import pygame
 import sys
 import math as m
 import random as rd
+import pyvectors  
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -45,14 +46,20 @@ def main():
     attaques_cercle = 0 #compteur des attaques cercle
     drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
     drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
+    
+    mouse_x = 0 #Abscisse de la souri
+    mouxe_y = 0 #Ordonnée de la souri
+    start_pos = vector2(mouse_x,mouse_y)
 
-    class BossBullet: # Classe pour les projectiles du boss
-        def __init__(self, x, y, target_x, target_y, velocity=5):
+    class Bullet: # Classe pour les projectiles
+        def __init__(self, x, y, target_x, target_y, nature, velocity=5) :
             self.x = x
             self.y = y
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
+            nature = nature
+
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
@@ -99,6 +106,12 @@ def main():
                     has_dashed= True
                     compteur_dash = 0
                     speed = 13
+        
+        if event.type == pygame.MOUSEBUTTONDOWN : 
+            mouse_x,mouse_y = event.pos
+            
+            if event.button == 1:
+                while 
            
         if has_dashed:
             if compteur_dash>7:
@@ -124,10 +137,10 @@ def main():
 
             # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
             # POUR L'INSTANT; que le check du pattern ligne
-            ispattern_ligne = True
+            ispattern_cercle = True
             attaques_ligne = 0
-            if attaques_ligne == 10*1.5:
-                ispattern_ligne = False
+            if attaques_cercle == 10*1.5:
+                ispattern_cercle = False
                     
             
             """      
@@ -142,11 +155,13 @@ def main():
 
             if compteur%60 == 0 and ispattern_ligne: 
                 drawline = True
-            if compteur%5==0 and ispattern_cercle:
+            if compteur%60==0 and ispattern_cercle:
                 drawcircle = True
 
             if line_attacking:
                 compteur_attaque_ligne+=0.25
+            if circle_attacking:
+                compteur_attaque_cercle +=0.25
             if has_dashed :
                 compteur_dash+=1
 
@@ -169,9 +184,10 @@ def main():
 
             if drawcircle:
                 if circle_attacking == False:
-                    attack_x = rect_x+5
+                    attack_x = rect_x +5
                     attack_y = rect_y+5
                 circle_attacking = True
+
                 pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque_cercle))
                 if compteur_attaque_cercle == 9:
                     pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque_cercle))
@@ -180,7 +196,6 @@ def main():
                     compteur_attaque_cercle = 0
         
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10))
-            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 
