@@ -29,8 +29,7 @@ def main():
     speed = 3
 
     LARGEUR = 800 # Largeur de la 
-    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
-    compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
+    
     HAUTEUR = 600 # Hauteur de la frenêtre
     
     rect_x = 10
@@ -38,25 +37,48 @@ def main():
 
     compteur = 0 # Compteur global des ticks
 
-    line_attacking = False # Etat d'attaque de ligne 
-    circle_attacking = False #Etat d'attaque de cercle
+    #line_attacking = False  Etat d'attaque de ligne 
+    #circle_attacking = False #Etat d'attaque de cercle
+
+    #compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    #compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
+
+    #ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
+    #ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
+
+    #attaques_ligne = 0 # Compteur des attaques  ligne 
+    #attaques_cercle = 0 #compteur des attaques cercle
+
+    #drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
+    #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
+
+    nb_phase = 1 # Nombre de la phase actuelle
+
+    current_pattern = "NO PATTERN" # Pattern actuel
+    draw_what = "NO PATTERN" # Que doit-on dessiner
+
+    patterns = {
+        "line": {
+            "attacking": False, # État d'attaque de la ligne
+            "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
+            "attaques": 0, # Compteur des attaques de la ligne
+            "attaques_max": 15 # Nombre d'attaques max avant de changer de pattern
+        },
+        "circle": {
+            "attacking": False, # État d'attaque du cercle
+            "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
+            "attaques": 0, # Compteur des attaques du cercle
+            "attaques_max": 15 # Nombre d'attaques max avant de changer de pattern
+        }
+    }
+
+    phase_1 = ["line", "circle"] # Patterns de la phase 1
 
     alive = True # Etat du player
-
-    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
-    compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la ligne
 
     has_dashed = False # Etat du dash
     compteur_dash = 600 # Cooldown du dash
 
-    ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
-    ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
-
-    attaques_ligne = 0 # Compteur des attaques  ligne 
-    attaques_cercle = 0 #compteur des attaques cercle
-    drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
-    drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
-    
     mouse_x = 0 #Abscisse de la souri
     mouse_y = 0 #Ordonnée de la souri
     start_pos = Vector2(mouse_x,mouse_y)
@@ -117,12 +139,12 @@ def main():
                     compteur_dash = 0
                     speed = 13
         
-        if event.type == pygame.MOUSEBUTTONDOWN : 
+        """if event.type == pygame.MOUSEBUTTONDOWN : 
             mouse_x,mouse_y = event.pos
             
             if event.button == 1:
-                projectile = Bullet(rect_x, rect_y, mouse)
-
+                projectile = Bullet(rect_x, rect_y, mouse_x)
+"""
            
         if has_dashed:
             if compteur_dash>7:
@@ -142,66 +164,70 @@ def main():
 
 
             # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
-            # POUR L'INSTANT; que le check du pattern ligne
-            ispattern_cercle = True
-            attaques_ligne = 0
-            if attaques_cercle == 10*1.5:
-                ispattern_cercle = False
-                    
-            
-            """      
-            def phase(nb_phase): # Lancer le comportement associé à sa phase
-                
-                
+            if current_pattern == "NO PATTERN":
+                print("Y'a pas de pattern là, on choisit")
                 if nb_phase == 1:
-                    patternes=[pattern_ligne, pattern_cercle]
-                    patternes[rd.randint(0,1)](10)"/home/canard101/NSI_proj/main.py", line 212, in <module>
-    main()
-  File "/home/canard101/NSI_proj/main.py", line 189, in
-            """
+                    current_pattern = rd.choice(phase_1)
+                    print(current_pattern)
+                    patterns[current_pattern]["attaques"] = 0
+
+
+            if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
+                print("YEP CFINI")
+                patterns[current_pattern]["attaques"] = 0
+                patterns[current_pattern]["attacking"] = False
+                patterns[current_pattern]["compteur_attaque"] = 0
+                current_pattern = "NO PATTERN"
+            
+            if current_pattern != "NO PATTERN":
+                print(patterns[current_pattern]["attaques"])
+            
             # FIN DE LA ZONE INTERDITE
 
-            if compteur%60 == 0 and ispattern_ligne: 
-                drawline = True
-            if compteur%60==0 and ispattern_cercle:
-                drawcircle = True
+            #if compteur%60 == 0 and ispattern_ligne: 
+            #    drawline = True
+            #if compteur%60==0 and ispattern_cercle:
+            #    drawcircle = True
+            
+            if compteur%60 and current_pattern != "NO PATTERN":
+                draw_what = current_pattern
 
-            if line_attacking:
-                compteur_attaque_ligne+=0.25
-            if circle_attacking:
-                compteur_attaque_cercle +=0.25
+            if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
+                patterns[current_pattern]["compteur_attaque"]+=0.25
+
             if has_dashed :
                 compteur_dash+=1
 
-            if drawline:
-                if line_attacking == False:
+            if draw_what == "line":
+                if patterns["line"]["attacking"] == False:
                     rdTheta = rd.uniform(0, 2*m.pi)
                     attack_x = rect_x+2000*m.cos(rdTheta)
                     attack_y = rect_y+2000*m.sin(rdTheta)
                     end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
-                line_attacking = True
+                patterns["line"]["attacking"] = True
                 
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
-                if compteur_attaque_ligne%50 == 9:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(compteur_attaque_ligne%50))
-                    drawline=False
-                    line_attacking=False
-                    compteur_attaque_ligne = 0
-                    attaques_ligne+=1
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
+                if patterns["line"]["compteur_attaque"]%50 == 9:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
+                    draw_what = "NO PATTERN"
+                    patterns["line"]["attacking"] = False
+                    patterns["line"]["compteur_attaque"] = 0
+                    patterns["line"]["attaques"]+=1
 
-            if drawcircle:
-                if circle_attacking == False:
+            if draw_what == "circle":
+                if patterns["circle"]["attacking"] == False:
                     attack_x = rect_x +5
                     attack_y = rect_y+5
-                circle_attacking = True
+                patterns["circle"]["attacking"] = True
 
-                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(compteur_attaque_cercle))
-                if compteur_attaque_cercle == 9:
-                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(compteur_attaque_cercle))
-                    drawcircle = False
-                    circle_attacking = False
-                    compteur_attaque_cercle = 0
+                pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
+                if patterns["circle"]["compteur_attaque"] == 9:
+                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
+                    draw_what = "NO PATTERN"
+                    patterns["circle"]["attacking"] = False
+                    patterns["circle"]["compteur_attaque"] = 0
+                    patterns["circle"]["attaques"]+=1
 
 
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
