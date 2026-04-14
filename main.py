@@ -129,11 +129,13 @@ def main():
                     text_bullet = base_font.render(str(projectile.x), False,(0,0,0))
                     fenetre.blit(text_bullet, (2,400))
                     if 0<projectile.x<800 and 0<projectile.y<600 : 
+                        print(projectile_active)
                         pygame.draw.circle(fenetre, BLACK,bullet_pos.components,5)
                         increase_y = Vector2(start_x, projectile.target_y)
                         increase_x = Vector2(start_y, projectile.target_x)
                         bullet_pos += Vector2(increase_x,increase_y)
                     projectile_active = False
+                    print("a")
 
 
             
