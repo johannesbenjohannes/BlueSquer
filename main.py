@@ -59,6 +59,15 @@ def main():
     current_pattern = "NO PATTERN" # Pattern actuel
     draw_what = "NO PATTERN" # Que doit-on dessiner
 
+    projectile = []
+    angle = 0
+    b_x=200
+    b_y=200
+
+    b_speedx = 5
+    b_speedy = 5
+    
+
     patterns = {
         "line": {
             "attacking": False, # État d'attaque de la ligne
@@ -83,16 +92,15 @@ def main():
     has_dashed = False # Etat du dash
     compteur_dash = 600 # Cooldown du dash
 
-    mouse_x = 0 #Abscisse de la souri
-    mouse_y = 0 #Ordonnée de la souri
+
+    mouse_x = 0
+    mouse_y = 0
     projectile_active = False
 
     class Bullet: # Classe pour les projectiles
-        def __init__(self, x, y, target_x, target_y, velocity=5) :
-            self.x = x
-            self.y = y
-            self.target_x = target_x
-            self.target_y = target_y
+        def __init__(self, pos, target, velocity=Vector2(5,5)) :
+            self.pos = pos
+            self.target = target
             self.velocity = velocity
 
     class CircleAttack:
@@ -150,6 +158,20 @@ def main():
             rect_y+= speed
         elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
+        mouse_x = pygame.mouse.get_pos()[0]
+        mouse_y = pygame.mouse.get_pos()[1]
+        dx = mouse_x-rect_x
+        dy = mouse_y - rect_y
+        theta_b = m.atan2(dy,dx)
+        print(m.degrees(theta_b))
+   
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            direction = Vector2(dx,dy)
+        else:
+            direction = Vector2(0,0)
+                
+
+
 
         if touches[pygame.K_SPACE]:
             if compteur_dash==600:
@@ -157,13 +179,7 @@ def main():
                     compteur_dash = 0
                     speed = 13
         
-        """if event.type == pygame.MOUSEBUTTONDOWN : 
-            mouse_x,mouse_y = event.pos
-            
-            if event.button == 1:
-                projectile = Bullet(rect_x, rect_y, mouse_x)
-"""
-           
+
         if has_dashed:
             if compteur_dash>7:
                     speed = 3
@@ -228,14 +244,12 @@ def main():
                 patterns["line"]["attacking"] = True
                 
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
-                if patterns["line"]["compteur_attaque"]%50 == 9:
-                    while patterns["line"]["compteur_attaque_linger"] < 30 :
-                        pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),9)
-                        patterns["line"]["compteur_attaque_linger"] +=0.25
+                if patterns["line"]["compteur_attaque"]%50 == 2:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),9)
                     draw_what = "NO PATTERN"
                     patterns["line"]["attacking"] = False
                     patterns["line"]["compteur_attaque"] = 0
-                    patterns["line"]["compteur_attaque_linger"] = 0
+
                     patterns["line"]["attaques"]+=1
                 
                     
@@ -251,15 +265,14 @@ def main():
                 pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
                 if patterns["circle"]["compteur_attaque"] == 9:
                     patterns["circle"]["compteur_attaque"] = 0
-                    patterns["circle"]["attacking"] = False
+                    #patterns["circle"]["attacking"] = False
                 pygame.draw.circle(fenetre, RED,(attack_x,attack_y),9)
                 if patterns["circle"]["compteur_attaque_linger"] > 30:
                     print("a")
                     draw_what = "NO PATTERN"
                     patterns["circle"]["compteur_attaque_linger"] = 0
                     patterns["circle"]["attaques"]+=1
-
-            print(patterns["circle"]["compteur_attaque_linger"])
+            
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
@@ -269,7 +282,7 @@ def main():
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
-            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            pygame.draw.circle(fenetre, BLACK,((Vector2((rect_x+5)+25*m.cos(theta_b), (rect_y+5)+25*m.sin(theta_b))+direction*5).components), 10,)
             
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
