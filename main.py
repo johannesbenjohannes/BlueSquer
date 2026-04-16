@@ -25,6 +25,7 @@ def main():
     RED = (255, 0, 0)
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
+    LIGHT_BLUE = (0,160,255)
 
     speed = 3
 
@@ -36,6 +37,7 @@ def main():
     rect_y = 10
 
     compteur = 0 # Compteur global des ticks
+
 
     #line_attacking = False  Etat d'attaque de ligne 
     #circle_attacking = False #Etat d'attaque de cercle
@@ -62,13 +64,15 @@ def main():
             "attacking": False, # État d'attaque de la ligne
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
             "attaques": 0, # Compteur des attaques de la ligne
-            "attaques_max": 15 # Nombre d'attaques max avant de changer de pattern
+            "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
+            "compteur_attaque_linger": 0
         },
         "circle": {
             "attacking": False, # État d'attaque du cercle
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
             "attaques": 0, # Compteur des attaques du cercle
-            "attaques_max": 15 # Nombre d'attaques max avant de changer de pattern
+            "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
+            "compteur_attaque_linger": 0
         }
     }
 
@@ -194,7 +198,8 @@ def main():
                 current_pattern = "NO PATTERN"
             
             if current_pattern != "NO PATTERN":
-                print(patterns[current_pattern]["attaques"])
+                pass
+                #print(patterns[current_pattern]["attaques"])
             
             # FIN DE LA ZONE INTERDITE
 
@@ -208,6 +213,7 @@ def main():
 
             if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                 patterns[current_pattern]["compteur_attaque"]+=0.25
+                patterns[current_pattern]["compteur_attaque_linger"]+=0.25
 
             if has_dashed :
                 compteur_dash+=1
@@ -223,11 +229,18 @@ def main():
                 
                 pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
                 if patterns["line"]["compteur_attaque"]%50 == 9:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
+                    while patterns["line"]["compteur_attaque_linger"] < 30 :
+                        pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),9)
+                        patterns["line"]["compteur_attaque_linger"] +=0.25
                     draw_what = "NO PATTERN"
                     patterns["line"]["attacking"] = False
                     patterns["line"]["compteur_attaque"] = 0
+                    patterns["line"]["compteur_attaque_linger"] = 0
                     patterns["line"]["attaques"]+=1
+                
+                    
+                
+                
 
             if draw_what == "circle":
                 if patterns["circle"]["attacking"] == False:
@@ -237,15 +250,17 @@ def main():
 
                 pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
                 if patterns["circle"]["compteur_attaque"] == 9:
-                    pygame.draw.circle(fenetre, RED,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
-                    draw_what = "NO PATTERN"
-                    patterns["circle"]["attacking"] = False
                     patterns["circle"]["compteur_attaque"] = 0
+                    patterns["circle"]["attacking"] = False
+                pygame.draw.circle(fenetre, RED,(attack_x,attack_y),9)
+                if patterns["circle"]["compteur_attaque_linger"] > 30:
+                    print("a")
+                    draw_what = "NO PATTERN"
+                    patterns["circle"]["compteur_attaque_linger"] = 0
                     patterns["circle"]["attaques"]+=1
 
-
+            print(patterns["circle"]["compteur_attaque_linger"])
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
-            
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
                 text_collison=base_font.render("collision", False, (0,0,0))
