@@ -29,7 +29,8 @@ def main():
     speed = 3
 
     LARGEUR = 800 # Largeur de la 
-    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne for visible game objects.
+Sprite(*groups) -> Sprite
     compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
     HAUTEUR = 600 # Hauteur de la frenêtre
     
@@ -62,16 +63,13 @@ def main():
     projectile_active = False
 
     class Bullet: # Classe pour les projectiles
-        def __init__(self, x, y, target_x, target_y, velocity=5) :
+        def __init__(self, x, y, target_x, target_y, nature, velocity=5) :
             self.x = x
             self.y = y
             self.target_x = target_x
             self.target_y = target_y
             self.velocity = velocity
-<<<<<<< HEAD
             self.nature = nature
-=======
->>>>>>> ca418aa5cd103fcef6b27b6a99505769046f3915
 
     class CircleAttack:
         circles=[]
