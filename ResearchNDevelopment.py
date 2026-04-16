@@ -242,7 +242,7 @@ def main():
                 
                     
             if draw_what == "circle":
-                if compteur % 20 == 0:
+                if compteur % 10 == 0:
                     CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
                     patterns["circle"]["attacking"] = True
 
