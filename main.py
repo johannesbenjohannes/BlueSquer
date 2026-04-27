@@ -84,9 +84,10 @@ def main():
         "bullets":{
             "attacking": False,
             "angles": [i*(m.pi/6) for i in range(12)],
-            "compteur_attaque": 0,
+            "attaques": 0,
             "attaques_max": 12,
-            "compteur_attaque_linger": 0
+            "compteur_attaque_linger": 0,
+            "compteur_attaque":0
         }
     }
 
@@ -307,15 +308,21 @@ def main():
                     CircleAttack.circles.clear()
             if draw_what == "bullets":
                 patterns["bullets"]["attacking"] = True
-                for a in patterns["bullets"]["angles"]:
-                    if compteur% 20 == 0:
-                        projectile.append(Bullet(Vector2(rect_x+200*m.cos(a),rect_y+200*m.sin(a)),Vector2(rect_x-rect_x+200*m.cos(a),rect_y-rect_y+200*m.sin(a)).unit,RED,0))
-                        patterns["bullets"]["compteur_attaque"]+=1
+                attaques = patterns["bullets"]["attaques"]
+                angles = patterns["bullets"]["angles"]
+                if compteur % 20 == 0:
+                    if attaques < len(angles):
+                        a = angles[attaques]
+                        projectile.append(
+                            Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
+                        patterns["bullets"]["attaques"] += 1
+                    else:
+                        draw_what = "NO PATTERN"
                 for obj in projectile:
                     if obj.nature == RED:
                         if compteur %20 == 0:
                             obj.velocity = -4
-                draw_what = "NO PATTERN"
+                
 
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
