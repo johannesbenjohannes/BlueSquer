@@ -18,6 +18,8 @@ def check_surrounding_pixel_colors(surface,x,y,target,n):
     return False
 
 
+
+
 def main():
 
     WHITE = (255, 255, 255)
@@ -95,12 +97,23 @@ def main():
     mouse_y = 0
 
 
+
     class Bullet: # Classe pour les projectiles
         def __init__(self, pos, target, nature, velocity=6) :
             self.pos = pos
             self.target = target
             self.velocity = velocity
             self.nature = nature
+
+    class Ennemy:
+        def __init__(self,x,y,w,h):
+            self.x = x
+            self.y = y
+            self.w = w
+            self.h = h
+        
+        def draw(self):
+            pygame.draw.rect(fenetre, BRASS, (self.x, self.y, self.w, self.h))
 
     class CircleAttack:
         circles=[]
@@ -123,8 +136,9 @@ def main():
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
+    boss = Ennemy(400,300,50,50)
     fenetre.fill(WHITE) # Fond blanc (RGB)
-
+   
     # --- 2. Boucle principale ---
     while True:
 
@@ -197,7 +211,10 @@ def main():
 
         # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
         fenetre.fill(WHITE)
+
+        boss.draw()
         if alive:
+            
             
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )#player
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
@@ -281,20 +298,20 @@ def main():
                     patterns["circle"]["compteur_attaque_linger"] = 0
 
                     CircleAttack.circles.clear()
-
-            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
-            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
-            if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
-                text_collison=base_font.render("collision", False, (0,0,0))
-                fenetre.blit(text_collison, (400,2))
-            fenetre.blit(text_color, (2,2))
-            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
-            fenetre.blit(text_ticks, (700, 2))
-            pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             for obj in projectile:
                 pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                     projectile.remove(obj)
+            boss_coord = (boss.x,boss.y)
+            text_boss_coord=base_font.render(str(boss_coord), False, (0,0,0))
+            if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
+                text_collison=base_font.render("collision", False, (0,0,0))
+                fenetre.blit(text_collison, (400,2))
+            fenetre.blit(text_boss_coord, (2,2))
+            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
+            fenetre.blit(text_ticks, (700, 2))
+            pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
+            
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
