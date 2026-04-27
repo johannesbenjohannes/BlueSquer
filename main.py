@@ -19,7 +19,6 @@ def check_surrounding_pixel_colors(surface,x,y,target,n):
 
 
 
-
 def main():
 
     WHITE = (255, 255, 255)
@@ -90,7 +89,7 @@ def main():
         }
     }
 
-    phase_1 = ["bullets"] # Patterns de la phase 1
+    phase_1 = ["circle"] # Patterns de la phase 1
 
     alive = True # Etat du player
 
@@ -129,14 +128,16 @@ def main():
             self.y = y
             self.t = 0
             self.r = 0
-            self.color = RED
+            self.color = GREEN
 
         def draw(self):
             pygame.draw.circle(fenetre, self.color, (self.x, self.y), self.r)
 
         def update(self):
-            self.r += 0.5
+            self.r += 0.4
             self.t += 1
+            if self.t == 28:
+                self.color = RED
             if self.r >= 12:
                 if self in CircleAttack.circles:
                     CircleAttack.circles.remove(self)
