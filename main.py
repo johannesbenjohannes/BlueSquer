@@ -80,10 +80,17 @@ def main():
             "attaques": 0, # Compteur des attaques du cercles
             "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
             "compteur_attaque_linger": 0
+        },
+        "bullets":{
+            "attacking": False,
+            "angles": [i*(m.pi/6) for i in range(12)],
+            "compteur_attaque": 0,
+            "attaques_max": 12,
+            "compteur_attaque_linger": 0
         }
     }
 
-    phase_1 = ["circle"] # Patterns de la phase 1
+    phase_1 = ["bullets"] # Patterns de la phase 1
 
     alive = True # Etat du player
 
@@ -298,16 +305,34 @@ def main():
                     patterns["circle"]["compteur_attaque_linger"] = 0
 
                     CircleAttack.circles.clear()
+            if draw_what == "bullets":
+                patterns["bullets"]["attacking"] = True
+                for a in patterns["bullets"]["angles"]:
+                    if compteur% 20 == 0:
+                        projectile.append(Bullet(Vector2(rect_x+200*m.cos(a),rect_y+200*m.sin(a)),Vector2(rect_x-rect_x+200*m.cos(a),rect_y-rect_y+200*m.sin(a)).unit,RED,0))
+                        patterns["bullets"]["compteur_attaque"]+=1
+                for obj in projectile:
+                    if obj.nature == RED:
+                        if compteur %20 == 0:
+                            obj.velocity = -4
+                draw_what = "NO PATTERN"
+
+            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
+            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
+            if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                text_collison=base_font.render("collision", False, (0,0,0))
+                fenetre.blit(text_collison, (400,2))
+            fenetre.blit(text_color, (2,2))
+            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
+            fenetre.blit(text_ticks, (700, 2))
+            pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             for obj in projectile:
                 pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                     projectile.remove(obj)
-            boss_coord = (boss.x,boss.y)
-            text_boss_coord=base_font.render(str(boss_coord), False, (0,0,0))
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
                 text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
-            fenetre.blit(text_boss_coord, (2,2))
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
