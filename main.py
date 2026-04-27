@@ -122,11 +122,11 @@ def main():
             pygame.draw.circle(fenetre, self.color, (self.x, self.y), self.r)
 
         def update(self):
-            print(self.t)
             self.r += 0.5
-            if self.r >= 12:
-                CircleAttack.circles.remove(self)
             self.t += 1
+            if self.r >= 12:
+                if self in CircleAttack.circles:
+                    CircleAttack.circles.remove(self)
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
@@ -227,7 +227,7 @@ def main():
                 print("YEP CFINI")
                 patterns[current_pattern]["attaques"] = 0
                 patterns[current_pattern]["attacking"] = False
-                current_color = fenetre.get_at(int(rect_x)+5, int(rect_y+5))
+                current_color = fenetre.get_at((int(rect_x)+5, int(rect_y+5)))
                 patterns[current_pattern]["compteur_attaque"] = 0
                 current_pattern = "NO PATTERN"
             
@@ -271,34 +271,24 @@ def main():
                     patterns["line"]["attaques"]+=1
                 
                     
-            # if draw_what == "circle":
-            #     if compteur % 20 == 0:
-            #         CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
-            #         patterns["circle"]["attacking"] = True
+            if draw_what == "circle":
+                 if compteur % 20 == 0:
+                     CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
+                     patterns["circle"]["attacking"] = True
+                     patterns["circle"]["attaques"] += 1
+                    
+                 for circle in CircleAttack.circles:
+                    circle.update()
+                    circle.draw()
+                
+                 if patterns["circle"]["attaques"] >= patterns["circle"]["attaques_max"]:
+                    draw_what = "NO PATTERN"
+                    patterns["circle"]["attacking"] = False
+                    patterns["circle"]["compteur_attaque"] = 0
+                    patterns["circle"]["compteur_attaque_linger"] = 0
 
-            #     pygame.draw.circle(fenetre, GREEN,(attack_x,attack_y),round(patterns["circle"]["compteur_attaque"]))
-            #     if patterns["circle"]["compteur_attaque"] == 9:
-            #         patterns["circle"]["compteur_attaque"] = 0
-            #         #patterns["circle"]["attacking"] = False
-            #     pygame.draw.circle(fenetre, RED,(attack_x,attack_y),9)
-            #     if patterns["circle"]["compteur_attaque_linger"] > 30:
-            #         print("a")
-            #         draw_what = "NO PATTERN"
-            #         patterns["circle"]["compteur_attaque_linger"] = 0
-            #         patterns["circle"]["attaques"]+=1
+                    CircleAttack.circles.clear()
 
-            if draw_what == "bullets":
-                patterns["bullets"]["attacking"] = True
-                for a in patterns["bullets"]["angles"]:
-                    if compteur% 20 == 0:
-                        projectile.append(Bullet(Vector2(rect_x+200*m.cos(a),rect_y+200*m.sin(a)),Vector2(rect_x-rect_x+200*m.cos(a),rect_y-rect_y+200*m.sin(a)).unit,RED,0))
-                        patterns["bullets"]["compteur_attaque"]+=1
-                for obj in projectile:
-                    if obj.nature == RED:
-                        if compteur %20 == 0:
-                            obj.velocity = -4
-                draw_what = "NO PATTERN"
-            
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
