@@ -78,10 +78,17 @@ def main():
             "attaques": 0, # Compteur des attaques du cercles
             "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
             "compteur_attaque_linger": 0
+        },
+        "bullets":{
+            "attacking": False,
+            "angles": [i*(m.pi/6) for i in range(12)],
+            "compteur_attaque": 0,
+            "attaques_max": 12,
+            "compteur_attaque_linger": 0
         }
     }
 
-    phase_1 = ["circle"] # Patterns de la phase 1
+    phase_1 = ["bullets"] # Patterns de la phase 1
 
     alive = True # Etat du player
 
@@ -279,6 +286,18 @@ def main():
             #         draw_what = "NO PATTERN"
             #         patterns["circle"]["compteur_attaque_linger"] = 0
             #         patterns["circle"]["attaques"]+=1
+
+            if draw_what == "bullets":
+                patterns["bullets"]["attacking"] = True
+                for a in patterns["bullets"]["angles"]:
+                    if compteur% 20 == 0:
+                        projectile.append(Bullet(Vector2(rect_x+200*m.cos(a),rect_y+200*m.sin(a)),Vector2(rect_x-rect_x+200*m.cos(a),rect_y-rect_y+200*m.sin(a)).unit,RED,0))
+                        patterns["bullets"]["compteur_attaque"]+=1
+                for obj in projectile:
+                    if obj.nature == RED:
+                        if compteur %20 == 0:
+                            obj.velocity = -4
+                draw_what = "NO PATTERN"
             
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
