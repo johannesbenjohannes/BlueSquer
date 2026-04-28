@@ -30,8 +30,7 @@ def main():
     BRASS = (255, 159, 41)
     LIGHT_BRASS = (255, 200, 91)
     SALMON = (255, 99, 85)
-    GREY = (10,10,10)
-
+    DARK_SALMON = (200, 60, 85)
     speed = 3
 
     LARGEUR = 800 # Largeur de la 
@@ -235,7 +234,9 @@ def main():
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
             pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
             pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
+            pygame.draw.rect(fenetre, DARK_SALMON,(105,555,boss.health,40))
             pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
+            
 
 
             # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
@@ -332,9 +333,10 @@ def main():
 
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
-            if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
-                text_collison=base_font.render("collision", False, (0,0,0))
-                fenetre.blit(text_collison, (400,2))
+            if 10<rect_x<790 and 10<rect_y<590:
+                if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                    text_collison=base_font.render("collision", False, (0,0,0))
+                    fenetre.blit(text_collison, (400,2))
             fenetre.blit(text_color, (2,2))
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
@@ -343,16 +345,16 @@ def main():
                 pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                     projectile.remove(obj)
-                elif 0<obj.pos.x<800 and 0<obj.pos.y<600 and check_surrounding_pixel_colors(fenetre, obj.pos.x,obj.pos.y,RED,10) and obj.nature == BLACK:
-                    projectile.remove(obj)
+                elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
+                    if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,RED,20) and obj.nature == BLACK:
+                        projectile.remove(obj)
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
-                text_collison=base_font.render("collision", False, (0,0,0))
+                text_collison=base_font.render("coqllision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
-                boss.health-=5
+                boss.health-=1
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
-            print(boss.health)
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
