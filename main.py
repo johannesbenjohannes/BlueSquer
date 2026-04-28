@@ -30,6 +30,7 @@ def main():
     BRASS = (255, 159, 41)
     LIGHT_BRASS = (255, 200, 91)
     SALMON = (255, 99, 85)
+    GREY = (10,10,10)
 
     speed = 3
 
@@ -40,6 +41,8 @@ def main():
     
     rect_x = 10
     rect_y = 10
+
+    boss_hit = False
 
     compteur = 0 # Compteur global des ticks
 
@@ -90,7 +93,7 @@ def main():
         }
     }
 
-    phase_1 = ["circle"] # Patterns de la phase 1
+    phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
 
     alive = True # Etat du player
 
@@ -113,14 +116,15 @@ def main():
             self.nature = nature
 
     class Ennemy:
-        def __init__(self,x,y,w,h):
+        def __init__(self,x,y,w,h,health):
             self.x = x
             self.y = y
             self.w = w
             self.h = h
+            self.health = health
         
         def draw(self):
-            pygame.draw.rect(fenetre, BRASS, (self.x, self.y, self.w, self.h))
+            pygame.draw.rect(fenetre, RED, (self.x, self.y, self.w, self.h))
 
     class CircleAttack:
         circles=[]
@@ -145,7 +149,7 @@ def main():
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Premier projet pygame")
-    boss = Ennemy(400,300,50,50)
+    boss = Ennemy(400,300,50,50,600)
     fenetre.fill(WHITE) # Fond blanc (RGB)
    
     # --- 2. Boucle principale ---
@@ -224,13 +228,14 @@ def main():
         boss.draw()
         if alive:
             
-            
+            #UI elements
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )#player
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
             pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/10),50))#dash bar
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
             pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
             pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
+            pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
 
 
             # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
@@ -280,9 +285,9 @@ def main():
                     end_y = rect_y+2000*m.sin(rdTheta+m.pi)
                 patterns["line"]["attacking"] = True
                 
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%50))
-                if patterns["line"]["compteur_attaque"]%50 == 2:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),9)
+                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%100))
+                if patterns["line"]["compteur_attaque"]%100 == 10:
+                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),10)
                     draw_what = "NO PATTERN"
                     patterns["line"]["attacking"] = False
                     patterns["line"]["compteur_attaque"] = 0
@@ -338,13 +343,16 @@ def main():
                 pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                     projectile.remove(obj)
+                elif 0<obj.pos.x<800 and 0<obj.pos.y<600 and check_surrounding_pixel_colors(fenetre, obj.pos.x,obj.pos.y,RED,10) and obj.nature == BLACK:
+                    projectile.remove(obj)
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
                 text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
+                boss.health-=5
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
-            
+            print(boss.health)
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
