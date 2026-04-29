@@ -149,7 +149,7 @@ def main():
                     CircleAttack.circles.remove(self)
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
-    pygame.display.set_caption("Premier projet pygame")
+    pygame.display.set_caption("Blue Squer")
     boss = Ennemy(400,300,50,50,600)
     fenetre.fill(WHITE) # Fond blanc (RGB)
    
@@ -331,7 +331,16 @@ def main():
                     if obj.nature == RED:
                         if compteur %20 == 0:
                             obj.velocity = -4
-                
+            
+            if boss.health <= 0:
+                print("\a")
+                print("YOU WON!")
+                if sys.platform == "darwin":
+                    os.system("say you won")
+                    print("\a")
+                sleep(0.5)
+                print("\a")
+                quit()
 
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
