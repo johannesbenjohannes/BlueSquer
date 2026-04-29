@@ -337,17 +337,10 @@ def main():
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             if 10<rect_x<790 and 10<rect_y<590:
                 if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
-                    if not immortel:
-                        alive = False
-                        print("\a")
-                        if sys.platform == "darwin":
-                            os.system("say game over")
-                            print("\a")
-                        sleep(0.5)
-                        quit()
-
                     text_collison=base_font.render("collision", False, (0,0,0))
                     fenetre.blit(text_collison, (400,2))
+                    if not immortel:
+                        alive = False
             fenetre.blit(text_color, (2,2))
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
@@ -366,6 +359,14 @@ def main():
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
+
+        else: # Si le joueur n'est pas en vie
+            print("\a")
+            if sys.platform == "darwin":
+                os.system("say game over")
+                print("\a")
+            sleep(0.5)
+            quit()
         pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
