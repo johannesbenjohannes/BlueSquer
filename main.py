@@ -1,8 +1,10 @@
 import pygame
 import sys
+import os
 import math as m
 import random as rd
 from pyvectors import Vector2
+from time import sleep
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -20,7 +22,6 @@ def check_surrounding_pixel_colors(surface,x,y,target,n):
 
 
 def main():
-
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
@@ -92,9 +93,10 @@ def main():
         }
     }
 
-    phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
+    phase_1 = ["circle", "bullets", "line"] # Patterns de la phase 1
 
     alive = True # Etat du player
+    immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
 
     has_dashed = False # Etat du dash
     compteur_dash = 600 # Cooldown du dash
@@ -335,6 +337,15 @@ def main():
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             if 10<rect_x<790 and 10<rect_y<590:
                 if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                    if not immortel:
+                        alive = False
+                        print("\a")
+                        if sys.platform == "darwin":
+                            os.system("say game over")
+                            print("\a")
+                        sleep(0.5)
+                        quit()
+
                     text_collison=base_font.render("collision", False, (0,0,0))
                     fenetre.blit(text_collison, (400,2))
             fenetre.blit(text_color, (2,2))
