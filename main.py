@@ -73,6 +73,7 @@ def main():
     previous_pattern = "NO PATTERN"
     draw_what = "NO PATTERN" # Que doit-on dessiner
 
+
     projectile = []
 
     patterns = {
@@ -81,27 +82,33 @@ def main():
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
             "attaques": 0, # Compteur des attaques de la ligne
             "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
-            "compteur_attaque_linger": 0
+
         },
         "circle": {
             "attacking": False, # État d'attaque du cercle
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
             "attaques": 0, # Compteur des attaques du cercles
             "attaques_max": 30, # Nombre d'attaques max avant de changer de pattern
-            "compteur_attaque_linger": 0
+
         },
         "bullets":{
             "attacking": False,
             "angles": [i*(m.pi/6) for i in range(12)],
             "attaques": 0,
             "attaques_max": 12,
-            "compteur_attaque_linger": 0,
             "compteur_attaque":0
+        },
+        "line2":{
+            "attacking": False, # État d'attaque de la ligne
+            "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
+            "attaques": 0, # Compteur des attaques de la ligne
+            "attaques_max": 20, # Nombre d'attaques max avant de changer de pattern
+
         }
     }
 
     phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
-
+    phase_2 = ["line2"]
     alive = True # Etat du player
     immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
 
@@ -286,6 +293,10 @@ def main():
                     print(current_pattern)
                     patterns[current_pattern]["attaques"] = 0
                     previous_pattern = current_pattern
+                elif nb_phase ==2:
+                    current_pattern = rd.choice(phase_2)
+                    print(current_pattern)
+                    patterns[current_pattern]["attaques"] = 0
 
 
             if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
@@ -312,7 +323,7 @@ def main():
 
             if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                 patterns[current_pattern]["compteur_attaque"]+=1
-                patterns[current_pattern]["compteur_attaque_linger"]+=0.25
+
 
             if has_dashed :
                 compteur_dash+=1
@@ -330,7 +341,6 @@ def main():
                         draw_what = "NO PATTERN"
                         patterns["line"]["attacking"] = False
                         patterns["line"]["compteur_attaque"] = 0
-                        patterns["line"]["compteur_attaque_linger"] = 0
                     
             if draw_what == "circle":
                  if compteur % 10 == 0:
@@ -346,7 +356,6 @@ def main():
                     draw_what = "NO PATTERN"
                     patterns["circle"]["attacking"] = False
                     patterns["circle"]["compteur_attaque"] = 0
-                    patterns["circle"]["compteur_attaque_linger"] = 0
 
                     CircleAttack.circles.clear()
             if draw_what == "bullets":
@@ -365,6 +374,22 @@ def main():
                     if obj.nature == RED:
                         if compteur %20 == 0:
                             obj.velocity = -4
+            if draw_what == "line2":
+                if compteur %40 == 0:
+                    rdTheta = rd.uniform(0, 2*m.pi)
+                    LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
+                    rdTheta = rd.uniform(0, 2*m.pi)
+                    LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
+                    patterns["line"]["attaques"]+=1
+                    patterns["line"]["attacking"] = True
+                for line in LineAttack.lines:
+                    line.update()
+                    line.draw()
+                if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
+                        draw_what = "NO PATTERN"
+                        patterns["line"]["attacking"] = False
+                        patterns["line"]["compteur_attaque"] = 0
+            
             
             if boss.health <= 0:
                 print("\a")
@@ -398,7 +423,9 @@ def main():
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
                 text_collison=base_font.render("coqllision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
-                boss.health-=1
+                boss.health-=2
+            if boss.health < 500:
+                nb_phase = 2
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
