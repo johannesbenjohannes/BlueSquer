@@ -69,6 +69,7 @@ def main():
     nb_phase = 1 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
+    previous_pattern = "NO PATTERN"
     draw_what = "NO PATTERN" # Que doit-on dessiner
 
     projectile = []
@@ -85,7 +86,7 @@ def main():
             "attacking": False, # État d'attaque du cercle
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
             "attaques": 0, # Compteur des attaques du cercles
-            "attaques_max": 60, # Nombre d'attaques max avant de changer de pattern
+            "attaques_max": 30, # Nombre d'attaques max avant de changer de pattern
             "compteur_attaque_linger": 0
         },
         "bullets":{
@@ -279,8 +280,11 @@ def main():
                 print("Y'a pas de pattern là, on choisit")
                 if nb_phase == 1:
                     current_pattern = rd.choice(phase_1)
+                    while current_pattern == previous_pattern:
+                        current_pattern = rd.choice(phase_1)
                     print(current_pattern)
                     patterns[current_pattern]["attaques"] = 0
+                    previous_pattern = current_pattern
 
 
             if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
@@ -407,7 +411,6 @@ def main():
             quit()
         pygame.display.flip()           # Rafraichissement de l'ecranssssss
         clock.tick(60)                # Limite a 60 images par seconde
-        print(player_direction)
 if __name__=="__main__":
     main()
 
