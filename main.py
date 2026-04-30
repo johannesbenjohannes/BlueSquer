@@ -33,6 +33,7 @@ def main():
     SALMON = (255, 99, 85)
     DARK_SALMON = (200, 60, 85)
     speed = 3
+    
 
     LARGEUR = 800 # Largeur de la 
     compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
@@ -97,7 +98,7 @@ def main():
         }
     }
 
-    phase_1 = ["circle"] # Patterns de la phase 1
+    phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
 
     alive = True # Etat du player
     immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
@@ -152,6 +153,29 @@ def main():
                 if self in CircleAttack.circles:
                     CircleAttack.circles.remove(self)
 
+    class LineAttack:
+        lines=[]
+        def __init__(self,ax,ay,ex,ey):
+            self.ax = ax
+            self.ay = ay
+            self.ex = ex
+            self.ey = ey
+            self.t = 0
+            self.w = 0
+            self.color = GREEN
+
+        def draw(self):
+            pygame.draw.line(fenetre, self.color, (self.ax, self.ay),(self.ex,self.ey), int(self.w))
+
+        def update(self):
+            self.w += 0.4
+            self.t += 1
+            if self.t == 28:
+                self.color = RED
+            if self.w >= 12:
+                if self in LineAttack.lines:
+                    LineAttack.lines.remove(self)
+
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Blue Squer")
     boss = Ennemy(400,300,50,50,600)
@@ -178,17 +202,17 @@ def main():
                 
         touches = pygame.key.get_pressed()
         if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
-            rect_x -= speed/2
-            rect_y += speed/2
+            rect_x -= speed*0.6
+            rect_y += speed*0.6
         elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
-            rect_x -= speed/2   
-            rect_y -= speed/2
+            rect_x -= speed*0.6 
+            rect_y -= speed*0.6
         elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 790 and rect_y > 0:
-            rect_x += speed/2   
-            rect_y -= speed/2
+            rect_x += speed*0.6 
+            rect_y -= speed*0.6
         elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 790 and rect_y < 590:
-            rect_x += speed/2   
-            rect_y += speed/2
+            rect_x += speed*0.6  
+            rect_y += speed*0.6
         elif touches[pygame.K_q] and rect_x > 0:
             rect_x -= speed
         elif touches[pygame.K_d] and rect_x < 790:
@@ -197,7 +221,7 @@ def main():
             rect_y+= speed
         elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
-        else:
+
         
         
         
@@ -289,23 +313,19 @@ def main():
                 compteur_dash+=1
 
             if draw_what == "line":
-                if patterns["line"]["attacking"] == False:
+                if compteur %60 == 0:
                     rdTheta = rd.uniform(0, 2*m.pi)
-                    attack_x = rect_x+2000*m.cos(rdTheta)
-                    attack_y = rect_y+2000*m.sin(rdTheta)
-                    end_x = rect_x+2000*m.cos(rdTheta+m.pi) 
-                    end_y = rect_y+2000*m.sin(rdTheta+m.pi)
-                patterns["line"]["attacking"] = True
-                
-                pygame.draw.line(fenetre, GREEN,(attack_x, attack_y),(end_x, end_y),round(patterns["line"]["compteur_attaque"]%100))
-                if patterns["line"]["compteur_attaque"]%100 == 10:
-                    pygame.draw.line(fenetre, RED,(attack_x, attack_y),(end_x, end_y),10)
-                    draw_what = "NO PATTERN"
-                    patterns["line"]["attacking"] = False
-                    patterns["line"]["compteur_attaque"] = 0
-
+                    LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
                     patterns["line"]["attaques"]+=1
-                
+                    patterns["line"]["attacking"] = True
+                for line in LineAttack.lines:
+                    line.update()
+                    line.draw()
+                if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
+                        draw_what = "NO PATTERN"
+                        patterns["line"]["attacking"] = False
+                        patterns["line"]["compteur_attaque"] = 0
+                        patterns["line"]["compteur_attaque_linger"] = 0
                     
             if draw_what == "circle":
                  if compteur % 10 == 0:
@@ -353,6 +373,13 @@ def main():
 
             current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
             text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
+            for obj in projectile:
+                pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
+                if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
+                    projectile.remove(obj)
+                elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
+                    if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,RED,20) and obj.nature == BLACK:
+                        projectile.remove(obj)
             if 10<rect_x<790 and 10<rect_y<590:
                 if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
                     text_collison=base_font.render("collision", False, (0,0,0))
@@ -363,13 +390,6 @@ def main():
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
-            for obj in projectile:
-                pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
-                if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
-                    projectile.remove(obj)
-                elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
-                    if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,RED,20) and obj.nature == BLACK:
-                        projectile.remove(obj)
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
                 text_collison=base_font.render("coqllision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
