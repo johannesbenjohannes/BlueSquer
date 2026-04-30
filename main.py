@@ -385,8 +385,8 @@ def main():
                 elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
                     if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
                         projectile.remove(obj)
-            if 10<rect_x<790 and 10<rect_y<590:
-                if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,BORDEAUX,10):
+            if 1<rect_x<799 and 2<rect_y<598:
+                if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
                     text_collison=base_font.render("collision", False, (0,0,0))
                     fenetre.blit(text_collison, (400,2))
                     if not immortel:
