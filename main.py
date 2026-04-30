@@ -132,7 +132,7 @@ def main():
             self.health = health
         
         def draw(self):
-            pygame.draw.rect(fenetre, RED, (self.x, self.y, self.w, self.h))
+            pygame.draw.rect(fenetre, BORDEAUX, (self.x, self.y, self.w, self.h))
 
     class CircleAttack:
         circles=[]
@@ -383,10 +383,10 @@ def main():
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                     projectile.remove(obj)
                 elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
-                    if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,RED,20) and obj.nature == BLACK:
+                    if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
                         projectile.remove(obj)
             if 10<rect_x<790 and 10<rect_y<590:
-                if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,BORDEAUX,10):
                     text_collison=base_font.render("collision", False, (0,0,0))
                     fenetre.blit(text_collison, (400,2))
                     if not immortel:
@@ -396,7 +396,7 @@ def main():
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
-                text_collison=base_font.render("coqllision", False, (0,0,0))
+                text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
                 boss.health-=1
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
