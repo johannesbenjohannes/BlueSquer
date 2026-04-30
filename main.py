@@ -48,6 +48,9 @@ def main():
     past_rect_x = 0
     past_rect_y = 0
 
+    boss_target_x = 0
+    boss_target_y = 0
+
     player_direction = Vector2(1,1)
 
     compteur = 0 # Compteur global des ticks
@@ -131,15 +134,14 @@ def main():
             self.nature = nature
 
     class Ennemy:
-        def __init__(self,x,y,w,h,health):
-            self.x = x
-            self.y = y
+        def __init__(self,pos,w,h,health):
+            self.pos = pos
             self.w = w
             self.h = h
             self.health = health
         
         def draw(self):
-            pygame.draw.rect(fenetre, BORDEAUX, (self.x, self.y, self.w, self.h))
+            pygame.draw.rect(fenetre, BORDEAUX, (self.pos.x, self.pos.y, self.w, self.h))
 
     class CircleAttack:
         circles=[]
@@ -187,7 +189,7 @@ def main():
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Blue Squer")
-    boss = Ennemy(400,300,50,50,600)
+    boss = Ennemy(Vector2(400,300),50,50,600)
     fenetre.fill(WHITE) # Fond blanc (RGB)
    
     # --- 2. Boucle principale ---
@@ -297,6 +299,11 @@ def main():
                     current_pattern = rd.choice(phase_2)
                     print(current_pattern)
                     patterns[current_pattern]["attaques"] = 0
+                    boss_target_x = rd.randint(100,700)
+                    boss_target_y = rd.randint(100,500)
+                    boss_target_pos = Vector2(boss.pos.x-boss_target_x,boss.pos.y-boss_target_y)
+                    print(boss_target_pos)
+
 
 
             if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
@@ -323,7 +330,10 @@ def main():
 
             if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                 patterns[current_pattern]["compteur_attaque"]+=1
-
+            if boss.pos.x!=boss_target_x:
+                boss.pos.x += boss_target_pos.unit.x *3
+            if boss.pos.y!=boss_target_y:
+                boss.pos.y += boss_target_pos.unit.y*3
 
             if has_dashed :
                 compteur_dash+=1
@@ -420,7 +430,7 @@ def main():
             text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
             fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
-            if check_surrounding_pixel_colors(fenetre,boss.x,boss.y,BLACK,50):
+            if check_surrounding_pixel_colors(fenetre,boss.pos.x,boss.pos.y,BLACK,50):
                 text_collison=base_font.render("collision", False, (0,0,0))
                 fenetre.blit(text_collison, (400,2))
                 boss.health-=2
