@@ -32,6 +32,7 @@ def main():
     LIGHT_BRASS = (255, 200, 91)
     SALMON = (255, 99, 85)
     DARK_SALMON = (200, 60, 85)
+    BORDEAUX = (159, 7, 18)
     speed = 3
     
 
@@ -104,7 +105,7 @@ def main():
     immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
 
     has_dashed = False # Etat du dash
-    compteur_dash = 600 # Cooldown du dash
+    compteur_dash = 300 # Cooldown du dash
 
     has_shot = False
     compteur_shot = 30
@@ -240,7 +241,7 @@ def main():
 
 
         if touches[pygame.K_SPACE]:
-            if compteur_dash==600:
+            if compteur_dash==300:
                     has_dashed= True
                     compteur_dash = 0
                     speed = 13
@@ -253,7 +254,7 @@ def main():
             if compteur_dash>7:
                     speed = 3
         if has_dashed ==True:
-            if compteur_dash==600:
+            if compteur_dash==300:
                 has_dashed=False
 
         # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
@@ -265,7 +266,7 @@ def main():
             #UI elements
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )#player
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/10),50))#dash bar
+            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/5),50))#dash bar
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
             pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
             pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
