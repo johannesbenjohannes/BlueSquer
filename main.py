@@ -41,8 +41,12 @@ def main():
     
     rect_x = 10
     rect_y = 10
+    moving = False
 
-    boss_hit = False
+    past_rect_x = 0
+    past_rect_y = 0
+
+    player_direction = Vector2(1,1)
 
     compteur = 0 # Compteur global des ticks
 
@@ -80,7 +84,7 @@ def main():
             "attacking": False, # État d'attaque du cercle
             "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
             "attaques": 0, # Compteur des attaques du cercles
-            "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
+            "attaques_max": 60, # Nombre d'attaques max avant de changer de pattern
             "compteur_attaque_linger": 0
         },
         "bullets":{
@@ -93,7 +97,7 @@ def main():
         }
     }
 
-    phase_1 = ["circle", "bullets", "line"] # Patterns de la phase 1
+    phase_1 = ["circle"] # Patterns de la phase 1
 
     alive = True # Etat du player
     immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
@@ -175,7 +179,7 @@ def main():
         touches = pygame.key.get_pressed()
         if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
             rect_x -= speed/2
-            rect_y += speed/2 
+            rect_y += speed/2
         elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
             rect_x -= speed/2   
             rect_y -= speed/2
@@ -193,16 +197,21 @@ def main():
             rect_y+= speed
         elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
-   
+        else:
         
-            
+        
         
        
         for obj in projectile:
             obj.pos+= obj.target * obj.velocity
-            
-
-                
+        
+        player_direction = Vector2(int(past_rect_x-rect_x),int(past_rect_y-rect_y))
+        if compteur%10==0:
+            past_rect_x = rect_x
+            past_rect_y = rect_y    
+        
+ 
+     
 
 
 
@@ -299,8 +308,8 @@ def main():
                 
                     
             if draw_what == "circle":
-                 if compteur % 20 == 0:
-                     CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
+                 if compteur % 10 == 0:
+                     CircleAttack.circles.append(CircleAttack(rect_x+5+player_direction.x*(-2.6), rect_y+5+player_direction.y*(-2.6)))
                      patterns["circle"]["attacking"] = True
                      patterns["circle"]["attaques"] += 1
                     
@@ -376,8 +385,9 @@ def main():
                 print("\a")
             sleep(0.5)
             quit()
-        pygame.display.flip()           # Rafraichissement de l'ecran
+        pygame.display.flip()           # Rafraichissement de l'ecranssssss
         clock.tick(60)                # Limite a 60 images par seconde
+        print(player_direction)
 if __name__=="__main__":
     main()
 
