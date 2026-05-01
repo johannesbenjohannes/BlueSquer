@@ -50,6 +50,7 @@ def main():
 
     boss_target_x = 0
     boss_target_y = 0
+    boss_target_pos = Vector2(1,1)
 
     player_direction = Vector2(1,1)
 
@@ -330,10 +331,11 @@ def main():
 
             if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                 patterns[current_pattern]["compteur_attaque"]+=1
-            if boss.pos.x!=boss_target_x:
-                boss.pos.x += boss_target_pos.unit.x *3
-            if boss.pos.y!=boss_target_y:
-                boss.pos.y += boss_target_pos.unit.y*3
+            if nb_phase == 2:
+                if boss.pos.x!=boss_target_x:
+                    boss.pos.x += boss_target_pos.unit.x *3
+                if boss.pos.y!=boss_target_y:
+                    boss.pos.y += boss_target_pos.unit.y*3
 
             if has_dashed :
                 compteur_dash+=1
