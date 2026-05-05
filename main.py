@@ -72,6 +72,7 @@ def main():
     #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
 
     nb_phase = 2 # Nombre de la phase actuelle
+    nb_phase = 2 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -114,6 +115,7 @@ def main():
     phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
     phase_2 = ["line2"]
     alive = True # Etat du player
+    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
     immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
 
     has_dashed = False # Etat du dash
@@ -302,7 +304,7 @@ def main():
                     patterns[current_pattern]["attaques"] = 0
                     boss_target_x = rd.randint(100,700)
                     boss_target_y = rd.randint(100,500)
-                    boss_target_pos = Vector2(boss.pos.x-boss_target_x,boss.pos.y-boss_target_y)
+                    boss_target_pos = Vector2(boss_target_x, boss_target_y)
                     print(boss_target_pos)
 
 
@@ -413,8 +415,6 @@ def main():
                 print("\a")
                 quit()
 
-            current_color = fenetre.get_at((int(rect_x)+5, int(rect_y)+5))
-            text_color=base_font.render(f"color: {current_color}", False, (0,0,0))
             for obj in projectile:
                 pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                 if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
@@ -428,18 +428,15 @@ def main():
                     fenetre.blit(text_collison, (400,2))
                     if not immortel:
                         alive = False
-            fenetre.blit(text_color, (2,2))
-            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
-            fenetre.blit(text_ticks, (700, 2))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
             if check_surrounding_pixel_colors(fenetre,boss.pos.x,boss.pos.y,BLACK,50):
-                text_collison=base_font.render("collision", False, (0,0,0))
-                fenetre.blit(text_collison, (400,2))
                 boss.health-=2
             if boss.health < 500:
                 nb_phase = 2
-            text_ticks=base_font.render(f"t: {compteur}", False, (0,0,0))
-            fenetre.blit(text_ticks, (700, 2))
+            text_ticks=base_font.render(f"boss_target: {boss_target_x};{boss_target_y}", False, (0,0,0))
+            fenetre.blit(text_ticks, (500, 2))
+            text_posboss=base_font.render(f"boss_pos: {round(boss.pos.x, 0)};{round(boss.pos.y, 0)}", False, (0,0,0))
+            fenetre.blit(text_posboss, (500, 22))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
 
         else: # Si le joueur n'est pas en vie
