@@ -71,7 +71,7 @@ def main():
     #drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
     #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
 
-    nb_phase = 1 # Nombre de la phase actuelle
+    nb_phase = 2 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -114,7 +114,7 @@ def main():
     phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
     phase_2 = ["line2"]
     alive = True # Etat du player
-    immortel = False # Mettre 'True' pour ne pas mourrir à la moindre collision
+    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
 
     has_dashed = False # Etat du dash
     compteur_dash = 300 # Cooldown du dash
@@ -332,9 +332,9 @@ def main():
             if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                 patterns[current_pattern]["compteur_attaque"]+=1
             if nb_phase == 2:
-                if boss.pos.x!=boss_target_x:
+                if boss.pos.x+25 not in range(boss_target_x-5,boss_target_x+5):
                     boss.pos.x += boss_target_pos.unit.x *3
-                if boss.pos.y!=boss_target_y:
+                if boss.pos.y+25 not in range(boss_target_y-5,boss_target_y+5):
                     boss.pos.y += boss_target_pos.unit.y*3
 
             if has_dashed :
@@ -449,7 +449,7 @@ def main():
                 print("\a")
             sleep(0.5)
             quit()
-        pygame.display.flip()           # Rafraichissement de l'ecranssssss
+        pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
     main()
