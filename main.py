@@ -99,8 +99,8 @@ def main():
     alive = True
     immortel = False
 
-    has_dashed = False
-    compteur_dash = 300
+    has_dashed = False # Etat du dash
+    compteur_dash = 120 # Cooldown du dash
 
     has_shot = False
     compteur_shot = 30
@@ -496,36 +496,38 @@ def main():
                 past_rect_x = rect_x
                 past_rect_y = rect_y    
 
-            if touches[pygame.K_SPACE]:
-                if compteur_dash==300:
-                        has_dashed= True
-                        compteur_dash = 0
-                        speed = 13
-            if has_shot:
-                compteur_shot +=1
-                if compteur_shot == 30:
-                    has_shot = False
+        if touches[pygame.K_SPACE]:
+            if compteur_dash==120:
+                    has_dashed= True
+                    compteur_dash = 0
+                    speed = 13
+                    immortel = True
+        if has_shot:
+            compteur_shot +=1
+            if compteur_shot == 30:
+                has_shot = False
 
-            if has_dashed:
-                if compteur_dash>7:
-                        speed = 3
-            if has_dashed ==True:
-                if compteur_dash==300:
-                    has_dashed=False
+        if has_dashed:
+            if compteur_dash>7:
+                    speed = 3
+                    immortel = False    
+        if has_dashed ==True:
+            if compteur_dash==120:
+                has_dashed=False
 
             fenetre.fill(WHITE)
 
             boss.draw()
             if alive:
             
-                pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )
-                pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-                pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/5),50))
-                pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
-                pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))
-                pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))
-                pygame.draw.rect(fenetre, DARK_SALMON,(105,555,boss.health,40))
-                pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
+            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )
+            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
+            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/2),50))#dash bar
+            pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
+            pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
+            pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
+            pygame.draw.rect(fenetre, DARK_SALMON,(105,555,boss.health,40))
+            pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
 
                 if current_pattern == "NO PATTERN":
                     print("Y'a pas de pattern là, on choisit")
@@ -556,13 +558,15 @@ def main():
                 if compteur%60 == 0 and current_pattern != "NO PATTERN":
                     draw_what = current_pattern
 
-                if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
-                    patterns[current_pattern]["compteur_attaque"]+=1
-                if nb_phase == 2:
-                    boss.pos.x += boss_target_pos.unit.x 
-                    boss.pos.y += boss_target_pos.unit.y
-                    dx = boss_target_pos.x - boss.pos.x
-                    dy = boss_target_pos.y - boss.pos.y
+            if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
+                patterns[current_pattern]["compteur_attaque"]+=1
+            if nb_phase == 2:
+                boss.pos.x += boss_target_pos.unit.x 
+                boss.pos.y += boss_target_pos.unit.y
+                dx = boss_target_pos.x - boss.pos.x
+                dy = boss_target_pos.y - boss.pos.y
+                if compteur % 60 == 0:
+                    projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
 
                     distance = (dx**2 + dy**2) ** 0.5
                     if distance < 2:
@@ -609,22 +613,21 @@ def main():
                         patterns["circle"]["compteur_attaque"] = 0
                         CircleAttack.circles.clear()
 
-                if draw_what == "bullets":
-                    patterns["bullets"]["attacking"] = True
-                    attaques = patterns["bullets"]["attaques"]
-                    angles = patterns["bullets"]["angles"]
-                    if compteur % 20 == 0:
-                        if attaques < len(angles):
-                            a = angles[attaques]
-                            projectile.append(
-                                Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
-                            patterns["bullets"]["attaques"] += 1
-                        else:
-                            draw_what = "NO PATTERN"
-                    for obj in projectile:
-                        if obj.nature == RED:
-                            if compteur %20 == 0:
-                                obj.velocity = -4
+            if draw_what == "bullets":
+                patterns["bullets"]["attacking"] = True
+                attaques = patterns["bullets"]["attaques"]
+                angles = patterns["bullets"]["angles"]
+                if compteur % 20 == 0:
+                    if attaques < len(angles):
+                        a = angles[attaques]
+                        projectile.append(Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
+                        patterns["bullets"]["attaques"] += 1
+                    else:
+                        draw_what = "NO PATTERN"
+                for obj in projectile:
+                    if obj.nature == RED:
+                        if compteur %20 == 0:
+                            obj.velocity = -4
 
                 if draw_what == "line2":
                     if compteur %40 == 0:
