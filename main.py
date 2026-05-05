@@ -72,6 +72,7 @@ def main():
     #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
 
     nb_phase = 2 # Nombre de la phase actuelle
+    nb_phase = 2 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -114,6 +115,7 @@ def main():
     phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
     phase_2 = ["line2"]
     alive = True # Etat du player
+    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
     immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
 
     has_dashed = False # Etat du dash
@@ -457,7 +459,7 @@ def main():
                 print("\a")
             sleep(0.5)
             quit()
-        pygame.display.flip()           # Rafraichissement de l'ecranssssss
+        pygame.display.flip()           # Rafraichissement de l'ecran
         clock.tick(60)                # Limite a 60 images par seconde
 if __name__=="__main__":
     main()
