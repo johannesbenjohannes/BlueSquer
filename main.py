@@ -72,7 +72,7 @@ def main():
     #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
 
     nb_phase = 2 # Nombre de la phase actuelle
-    nb_phase = 2 # Nombre de la phase actuelle
+
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -116,10 +116,10 @@ def main():
     phase_2 = ["line2"]
     alive = True # Etat du player
     immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
-    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
+  
 
     has_dashed = False # Etat du dash
-    compteur_dash = 300 # Cooldown du dash
+    compteur_dash = 120 # Cooldown du dash
 
     has_shot = False
     compteur_shot = 30
@@ -254,10 +254,11 @@ def main():
 
 
         if touches[pygame.K_SPACE]:
-            if compteur_dash==300:
+            if compteur_dash==120:
                     has_dashed= True
                     compteur_dash = 0
                     speed = 13
+                    immortel = True
         if has_shot:
             compteur_shot +=1
             if compteur_shot == 30:
@@ -266,8 +267,9 @@ def main():
         if has_dashed:
             if compteur_dash>7:
                     speed = 3
+                    immortel = False    
         if has_dashed ==True:
-            if compteur_dash==300:
+            if compteur_dash==120:
                 has_dashed=False
 
         # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
@@ -279,7 +281,7 @@ def main():
             #UI elements
             pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )#player
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/5),50))#dash bar
+            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/2),50))#dash bar
             pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
             pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
             pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
@@ -338,9 +340,10 @@ def main():
                 boss.pos.y += boss_target_pos.unit.y
                 dx = boss_target_pos.x - boss.pos.x
                 dy = boss_target_pos.y - boss.pos.y
+                if compteur % 60 == 0:
+                    projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
 
                 distance = (dx**2 + dy**2) ** 0.5
-                "sybau"
                 if distance < 2:
                     boss.pos.x = boss_target_pos.x
                     boss.pos.y = boss_target_pos.y
@@ -392,8 +395,7 @@ def main():
                 if compteur % 20 == 0:
                     if attaques < len(angles):
                         a = angles[attaques]
-                        projectile.append(
-                            Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
+                        projectile.append(Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
                         patterns["bullets"]["attaques"] += 1
                     else:
                         draw_what = "NO PATTERN"
