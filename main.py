@@ -56,23 +56,7 @@ def main():
 
     compteur = 0 # Compteur global des ticks
 
-    #line_attacking = False  Etat d'attaque de ligne 
-    #circle_attacking = False #Etat d'attaque de cercle
-
-    #compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
-    #compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
-
-    #ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
-    #ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
-
-    #attaques_ligne = 0 # Compteur des attaques  ligne 
-    #attaques_cercle = 0 #compteur des attaques cercle
-
-    #drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
-    #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
-
-    nb_phase = 2 # Nombre de la phase actuelle
-    nb_phase = 2 # Nombre de la phase actuelle
+    nb_phase = 1 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -83,18 +67,16 @@ def main():
 
     patterns = {
         "line": {
-            "attacking": False, # État d'attaque de la ligne
-            "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
-            "attaques": 0, # Compteur des attaques de la ligne
-            "attaques_max": 15, # Nombre d'attaques max avant de changer de pattern
-
+            "attacking": False,
+            "compteur_attaque": 0,
+            "attaques": 0,
+            "attaques_max": 15,
         },
         "circle": {
-            "attacking": False, # État d'attaque du cercle
-            "compteur_attaque": 0, # Compteur de tick lors de l'attaque du cercle
-            "attaques": 0, # Compteur des attaques du cercles
-            "attaques_max": 30, # Nombre d'attaques max avant de changer de pattern
-
+            "attacking": False,
+            "compteur_attaque": 0,
+            "attaques": 0,
+            "attaques_max": 30,
         },
         "bullets":{
             "attacking": False,
@@ -104,22 +86,20 @@ def main():
             "compteur_attaque":0
         },
         "line2":{
-            "attacking": False, # État d'attaque de la ligne
-            "compteur_attaque": 0, # Compteur de tick lors de l'attaque de la ligne
-            "attaques": 0, # Compteur des attaques de la ligne
-            "attaques_max": 20, # Nombre d'attaques max avant de changer de pattern
-
+            "attacking": False,
+            "compteur_attaque": 0,
+            "attaques": 0,
+            "attaques_max": 20,
         }
     }
 
-    phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
+    phase_1 = ["circle", "bullets","line"]
     phase_2 = ["line2"]
-    alive = True # Etat du player
-    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
-    immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
+    alive = True
+    immortel = False
 
-    has_dashed = False # Etat du dash
-    compteur_dash = 300 # Cooldown du dash
+    has_dashed = False
+    compteur_dash = 300
 
     has_shot = False
     compteur_shot = 30
@@ -129,7 +109,7 @@ def main():
 
 
 
-    class Bullet: # Classe pour les projectiles
+    class Bullet:
         def __init__(self, pos, target, nature, velocity=6) :
             self.pos = pos
             self.target = target
@@ -193,14 +173,134 @@ def main():
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
     pygame.display.set_caption("Blue Squer")
     boss = Ennemy(Vector2(400,300),50,50,600)
-    fenetre.fill(WHITE) # Fond blanc (RGB)
-   
-    # --- 2. Boucle principale ---
+    fenetre.fill(WHITE)
+
+    # --- 2. Start Menu ---
+    title_font = pygame.font.SysFont('Comic Sans MS', 64, bold=True)
+    button_font = pygame.font.SysFont('Comic Sans MS', 28)
+    label_font  = pygame.font.SysFont('Comic Sans MS', 20)
+
+    ORANGE = BLUE  # lobsta uses the same blue as squer
+
+    # Character card layout
+    CARD_W, CARD_H = 180, 200
+    card_gap = 40
+    cards_total_w = 2 * CARD_W + card_gap
+    card_left_x  = LARGEUR // 2 - cards_total_w // 2
+    card_right_x = card_left_x + CARD_W + card_gap
+    card_y = HAUTEUR // 2 + 10
+
+    def draw_squer_preview(cx, cy, selected):
+        color = LIGHT_BLUE if selected else BLUE
+        pygame.draw.rect(fenetre, color, (cx - 18, cy - 18, 36, 36), border_radius=4)
+
+    def draw_lobsta_preview(cx, cy, selected):
+        color = LIGHT_BLUE if selected else BLUE
+        pygame.draw.ellipse(fenetre, color, (cx - 12, cy - 22, 24, 38))   # body
+        pygame.draw.ellipse(fenetre, color, (cx - 30, cy - 10, 18, 12))   # left claw
+        pygame.draw.ellipse(fenetre, color, (cx + 12, cy - 10, 18, 12))   # right claw
+        pygame.draw.line(fenetre, color, (cx - 6, cy - 22), (cx - 20, cy - 38), 2)  # antennae
+        pygame.draw.line(fenetre, color, (cx + 6, cy - 22), (cx + 20, cy - 38), 2)
+        pygame.draw.ellipse(fenetre, color, (cx - 8, cy + 16, 16, 10))    # tail
+
+    def draw_start_menu(offset, selected_char):
+        fenetre.fill(WHITE)
+
+        # Animated dot-grid moving diagonally towards bottom-left
+        spacing = 40
+        for gx in range(-spacing, LARGEUR + spacing, spacing):
+            for gy in range(-spacing, HAUTEUR + spacing, spacing):
+                x = (gx - offset) % (LARGEUR + spacing)
+                y = (gy + offset) % (HAUTEUR + spacing)
+                pygame.draw.circle(fenetre, (220, 220, 220), (x, y), 2)
+
+        # Title
+        title_surf = title_font.render("Blue Squer", True, BLUE)
+        title_rect = title_surf.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 - 130))
+        fenetre.blit(title_surf, title_rect)
+        pygame.draw.line(fenetre, LIGHT_BLUE,
+                         (title_rect.left + 10, title_rect.bottom + 6),
+                         (title_rect.right - 10, title_rect.bottom + 6), 3)
+
+        # "Choose your character" label
+        pick_surf = label_font.render("choose your character", True, (160, 160, 160))
+        fenetre.blit(pick_surf, pick_surf.get_rect(center=(LARGEUR // 2, card_y - 22)))
+
+        mx, my = pygame.mouse.get_pos()
+
+        # --- Left card: Blue Squer ---
+        left_rect = pygame.Rect(card_left_x, card_y, CARD_W, CARD_H)
+        squer_sel = selected_char == "Blue Squer"
+        squer_hov = left_rect.collidepoint(mx, my)
+        border_col_l = BLUE if squer_sel else (BLACK if squer_hov else (200, 200, 200))
+        pygame.draw.rect(fenetre, WHITE, left_rect, border_radius=8)
+        pygame.draw.rect(fenetre, border_col_l, left_rect, 3 if (squer_sel or squer_hov) else 2, border_radius=8)
+        draw_squer_preview(card_left_x + CARD_W // 2, card_y + 80, squer_sel)
+        name_l = button_font.render("Blue Squer", True, BLUE if squer_sel else BLACK)
+        fenetre.blit(name_l, name_l.get_rect(center=(card_left_x + CARD_W // 2, card_y + CARD_H - 35)))
+        if squer_sel:
+            tick_l = label_font.render("✓ selected", True, BLUE)
+            fenetre.blit(tick_l, tick_l.get_rect(center=(card_left_x + CARD_W // 2, card_y + CARD_H - 12)))
+
+        # --- Right card: Blue Lobsta ---
+        right_rect = pygame.Rect(card_right_x, card_y, CARD_W, CARD_H)
+        lobsta_sel = selected_char == "Blue Lobsta"
+        lobsta_hov = right_rect.collidepoint(mx, my)
+        border_col_r = ORANGE if lobsta_sel else (BLACK if lobsta_hov else (200, 200, 200))
+        pygame.draw.rect(fenetre, WHITE, right_rect, border_radius=8)
+        pygame.draw.rect(fenetre, border_col_r, right_rect, 3 if (lobsta_sel or lobsta_hov) else 2, border_radius=8)
+        draw_lobsta_preview(card_right_x + CARD_W // 2, card_y + 80, lobsta_sel)
+        name_r = button_font.render("Blue Lobsta", True, ORANGE if lobsta_sel else BLACK)
+        fenetre.blit(name_r, name_r.get_rect(center=(card_right_x + CARD_W // 2, card_y + CARD_H - 35)))
+        if lobsta_sel:
+            tick_r = label_font.render("✓ selected", True, ORANGE)
+            fenetre.blit(tick_r, tick_r.get_rect(center=(card_right_x + CARD_W // 2, card_y + CARD_H - 12)))
+
+        # --- Play button (greyed out until a character is picked) ---
+        btn_w, btn_h = 160, 52
+        btn_rect = pygame.Rect(LARGEUR // 2 - btn_w // 2, card_y + CARD_H + 28, btn_w, btn_h)
+        btn_active = selected_char != "NONE"
+        btn_hov = btn_rect.collidepoint(mx, my) and btn_active
+        btn_color = (LIGHT_BLUE if btn_hov else BLUE) if btn_active else (200, 200, 200)
+        txt_color = WHITE if btn_active else (160, 160, 160)
+        brd_color = BLACK if btn_active else (180, 180, 180)
+        pygame.draw.rect(fenetre, btn_color, btn_rect, border_radius=6)
+        pygame.draw.rect(fenetre, brd_color, btn_rect, 2, border_radius=6)
+        btn_text = button_font.render("PLAY", True, txt_color)
+        fenetre.blit(btn_text, btn_text.get_rect(center=btn_rect.center))
+
+        return left_rect, right_rect, btn_rect
+
+    menu_offset   = 0
+    selected_char = "NONE"
+
+    in_menu = True
+    while in_menu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                left_rect, right_rect, btn_rect = draw_start_menu(menu_offset, selected_char)
+                if left_rect.collidepoint(event.pos):
+                    selected_char = "Blue Squer"
+                elif right_rect.collidepoint(event.pos):
+                    selected_char = "Blue Lobsta"
+                elif btn_rect.collidepoint(event.pos) and selected_char != "NONE":
+                    player_character = selected_char
+                    in_menu = False
+
+        draw_start_menu(menu_offset, selected_char)
+        menu_offset = (menu_offset + 1) % 40
+        pygame.display.flip()
+        clock.tick(60)
+
+    # --- 3. Boucle principale ---
     while True:
 
-        compteur+=1 # CHECKS DU LANCEMENT DU PATTERN
+        compteur+=1
 
-        # --- 3. Gestion des events ---
+        # --- Gestion des events ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -236,10 +336,6 @@ def main():
         elif touches[pygame.K_z] and rect_y > 0:
             rect_y-= speed
 
-        
-        
-        
-       
         for obj in projectile:
             obj.pos+= obj.target * obj.velocity
         
@@ -247,11 +343,6 @@ def main():
         if compteur%10==0:
             past_rect_x = rect_x
             past_rect_y = rect_y    
-        
- 
-     
-
-
 
         if touches[pygame.K_SPACE]:
             if compteur_dash==300:
@@ -270,25 +361,20 @@ def main():
             if compteur_dash==300:
                 has_dashed=False
 
-        # --- Mise a jour de l'affichage Ceci est généralement causé par un autre dépôt poussé
         fenetre.fill(WHITE)
 
         boss.draw()
         if alive:
             
-            #UI elements
-            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )#player
+            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )
             pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/5),50))#dash bar
-            pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
-            pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
-            pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
+            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/5),50))
+            pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)
+            pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))
+            pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))
             pygame.draw.rect(fenetre, DARK_SALMON,(105,555,boss.health,40))
             pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
-            
 
-
-            # CHECK DE LA PHASE - TRES SENSIBLE - NE PAS CODER AUTRE CHOSE
             if current_pattern == "NO PATTERN":
                 print("Y'a pas de pattern là, on choisit")
                 if nb_phase == 1:
@@ -307,8 +393,6 @@ def main():
                     boss_target_pos = Vector2(boss_target_x, boss_target_y)
                     print(boss_target_pos)
 
-
-
             if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
                 print("YEP CFINI")
                 patterns[current_pattern]["attaques"] = 0
@@ -316,17 +400,6 @@ def main():
                 current_color = fenetre.get_at((int(rect_x)+5, int(rect_y+5)))
                 patterns[current_pattern]["compteur_attaque"] = 0
                 current_pattern = "NO PATTERN"
-            
-            if current_pattern != "NO PATTERN":
-                pass
-                #print(patterns[current_pattern]["attaques"])
-            
-            # FIN DE LA ZONE INTERDITE
-
-            #if compteur%60 == 0 and ispattern_ligne: 
-            #    drawline = True
-            #if compteur%60==0 and ispattern_cercle:
-            #    drawcircle = True
             
             if compteur%60 == 0 and current_pattern != "NO PATTERN":
                 draw_what = current_pattern
@@ -340,7 +413,6 @@ def main():
                 dy = boss_target_pos.y - boss.pos.y
 
                 distance = (dx**2 + dy**2) ** 0.5
-                "sybau"
                 if distance < 2:
                     boss.pos.x = boss_target_pos.x
                     boss.pos.y = boss_target_pos.y
@@ -383,8 +455,8 @@ def main():
                     draw_what = "NO PATTERN"
                     patterns["circle"]["attacking"] = False
                     patterns["circle"]["compteur_attaque"] = 0
-
                     CircleAttack.circles.clear()
+
             if draw_what == "bullets":
                 patterns["bullets"]["attacking"] = True
                 attaques = patterns["bullets"]["attaques"]
@@ -401,6 +473,7 @@ def main():
                     if obj.nature == RED:
                         if compteur %20 == 0:
                             obj.velocity = -4
+
             if draw_what == "line2":
                 if compteur %40 == 0:
                     rdTheta = rd.uniform(0, 2*m.pi)
@@ -416,7 +489,6 @@ def main():
                         draw_what = "NO PATTERN"
                         patterns["line"]["attacking"] = False
                         patterns["line"]["compteur_attaque"] = 0
-            
             
             if boss.health <= 0:
                 print("\a")
@@ -452,40 +524,15 @@ def main():
             fenetre.blit(text_posboss, (500, 22))
             pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
 
-        else: # Si le joueur n'est pas en vie
+        else:
             print("\a")
             if sys.platform == "darwin":
                 os.system("say game over")
                 print("\a")
             sleep(0.5)
             quit()
-        pygame.display.flip()           # Rafraichissement de l'ecran
-        clock.tick(60)                # Limite a 60 images par seconde
+        pygame.display.flip()
+        clock.tick(60)
+
 if __name__=="__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-    """Si objet atour du pc (ie epée):
-     mouse_x = pygame.mouse.get_pos()[0]
-        mouse_y = pygame.mouse.get_pos()[1]
-        dx = mouse_x-rect_x
-        dy = mouse_y - rect_y
-        theta_b = m.atan2(dy,dx)
-        print(m.degrees(theta_b))
-   
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            direction = Vector2(dx,dy).unit
-        else:
-            direction = Vector2(0,0)
-            
-            
-    pygame.draw.circle(fenetre, BLACK,((Vector2((rect_x+5)+25*m.cos(theta_b), (rect_y+5)+25*m.sin(theta_b))+direction*5).components), 10,)
-            """
