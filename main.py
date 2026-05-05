@@ -112,7 +112,7 @@ def main():
     }
 
     phase_1 = ["circle", "bullets","line"] # Patterns de la phase 1
-    phase_2 = ["line"]
+    phase_2 = ["line2"]
     alive = True # Etat du player
     immortel = True # Mettre 'True' pour ne pas mourrir à la moindre collision
 
@@ -342,14 +342,14 @@ def main():
                 if distance < 2:
                     boss.pos.x = boss_target_pos.x
                     boss.pos.y = boss_target_pos.y
-                    quit()
+                    boss_target_x = rd.randint(100,700)
+                    boss_target_y = rd.randint(100,500)
+                    boss_target_pos = Vector2(boss_target_x, boss_target_y)
                 else:
                     ux = dx / distance
                     uy = dy / distance
-
-                    speed = 2
-                    boss.pos.x += ux * speed
-                    boss.pos.y += uy * speed
+                    boss.pos.x += ux * 3
+                    boss.pos.y += uy * 3
             if has_dashed :
                 compteur_dash+=1
 
