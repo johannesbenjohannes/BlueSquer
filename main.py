@@ -338,7 +338,7 @@ def main():
                 dy = boss_target_pos.y - boss.pos.y
 
                 distance = (dx**2 + dy**2) ** 0.5
-
+                "sybau"
                 if distance < 2:
                     boss.pos.x = boss_target_pos.x
                     boss.pos.y = boss_target_pos.y
