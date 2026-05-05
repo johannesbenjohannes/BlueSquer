@@ -139,7 +139,7 @@ def main():
         def draw(self):
             pygame.draw.circle(fenetre, self.color, (self.x, self.y), self.r)
 
-        def upgrade(self):
+        def update(self):
             self.r += 0.4
             self.t += 1
             if self.t == 28:
@@ -415,7 +415,6 @@ def main():
             clock.tick(60)
 
         # --- Reset game state before each run ---
-        nonlocal_vars = {}
         rect_x = 10
         rect_y = 10
         past_rect_x = 0
@@ -439,8 +438,9 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
+        immortel = False
         has_dashed = False
-        compteur_dash = 300
+        compteur_dash = 120
         has_shot = False
         compteur_shot = 30
         speed = 3
@@ -450,7 +450,7 @@ def main():
         game_running = True
         while game_running:
 
-            compteur+=1
+            compteur += 1
 
             # --- Gestion des events ---
             for event in pygame.event.get():
@@ -465,69 +465,71 @@ def main():
                     projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK))
                     has_shot = True
                     compteur_shot = 0
-                
+
             touches = pygame.key.get_pressed()
             if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
                 rect_x -= speed*0.6
                 rect_y += speed*0.6
             elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
-                rect_x -= speed*0.6 
+                rect_x -= speed*0.6
                 rect_y -= speed*0.6
             elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 790 and rect_y > 0:
-                rect_x += speed*0.6 
+                rect_x += speed*0.6
                 rect_y -= speed*0.6
             elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 790 and rect_y < 590:
-                rect_x += speed*0.6  
+                rect_x += speed*0.6
                 rect_y += speed*0.6
             elif touches[pygame.K_q] and rect_x > 0:
                 rect_x -= speed
             elif touches[pygame.K_d] and rect_x < 790:
                 rect_x += speed
             elif touches[pygame.K_s] and rect_y < 590:
-                rect_y+= speed
+                rect_y += speed
             elif touches[pygame.K_z] and rect_y > 0:
-                rect_y-= speed
+                rect_y -= speed
 
-            for obj in projectile:
-                obj.pos+= obj.target * obj.velocity
-        
-            player_direction = Vector2(int(past_rect_x-rect_x),int(past_rect_y-rect_y))
-            if compteur%10==0:
-                past_rect_x = rect_x
-                past_rect_y = rect_y    
-
-        if touches[pygame.K_SPACE]:
-            if compteur_dash==120:
-                    has_dashed= True
+            if touches[pygame.K_SPACE]:
+                if compteur_dash == 120:
+                    has_dashed = True
                     compteur_dash = 0
                     speed = 13
                     immortel = True
-        if has_shot:
-            compteur_shot +=1
-            if compteur_shot == 30:
-                has_shot = False
 
-        if has_dashed:
-            if compteur_dash>7:
+            for obj in projectile:
+                obj.pos += obj.target * obj.velocity
+
+            player_direction = Vector2(int(past_rect_x-rect_x),int(past_rect_y-rect_y))
+            if compteur % 10 == 0:
+                past_rect_x = rect_x
+                past_rect_y = rect_y
+
+            if has_shot:
+                compteur_shot += 1
+                if compteur_shot == 30:
+                    has_shot = False
+
+            if has_dashed:
+                if compteur_dash > 7:
                     speed = 3
-                    immortel = False    
-        if has_dashed ==True:
-            if compteur_dash==120:
-                has_dashed=False
+                    immortel = False
+            if has_dashed == True:
+                if compteur_dash == 120:
+                    has_dashed = False
 
             fenetre.fill(WHITE)
 
             boss.draw()
+
             if alive:
-            
-            pygame.draw.rect( fenetre, BLUE ,(rect_x, rect_y, 10, 10) )
-            pygame.draw.circle(fenetre, WHITE,(rect_x+5, rect_y+5,), 200,1)
-            pygame.draw.rect(fenetre, LIGHT_BLUE,(50,50,round(compteur_dash/2),50))#dash bar
-            pygame.draw.rect(fenetre, BLACK,(45,45,70,55),5)#dash box
-            pygame.draw.rect(fenetre, LIGHT_BRASS,(45,110,30,15))#casing
-            pygame.draw.rect(fenetre, BRASS,(45,110,compteur_shot,15))#bullet
-            pygame.draw.rect(fenetre, DARK_SALMON,(105,555,boss.health,40))
-            pygame.draw.rect(fenetre, SALMON,(100,550,boss.health,40))
+
+                pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
+                pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
+                pygame.draw.rect(fenetre, LIGHT_BLUE, (50,50,round(compteur_dash/2),50))  # dash bar
+                pygame.draw.rect(fenetre, BLACK, (45,45,70,55), 5)  # dash box
+                pygame.draw.rect(fenetre, LIGHT_BRASS, (45,110,30,15))  # casing
+                pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
+                pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
+                pygame.draw.rect(fenetre, SALMON, (100,550,boss.health,40))
 
                 if current_pattern == "NO PATTERN":
                     print("Y'a pas de pattern là, on choisit")
@@ -538,7 +540,7 @@ def main():
                         print(current_pattern)
                         patterns[current_pattern]["attaques"] = 0
                         previous_pattern = current_pattern
-                    elif nb_phase ==2:
+                    elif nb_phase == 2:
                         current_pattern = rd.choice(phase_2)
                         print(current_pattern)
                         patterns[current_pattern]["attaques"] = 0
@@ -554,97 +556,97 @@ def main():
                     current_color = fenetre.get_at((int(rect_x)+5, int(rect_y+5)))
                     patterns[current_pattern]["compteur_attaque"] = 0
                     current_pattern = "NO PATTERN"
-            
-                if compteur%60 == 0 and current_pattern != "NO PATTERN":
+
+                if compteur % 60 == 0 and current_pattern != "NO PATTERN":
                     draw_what = current_pattern
 
-            if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
-                patterns[current_pattern]["compteur_attaque"]+=1
-            if nb_phase == 2:
-                boss.pos.x += boss_target_pos.unit.x 
-                boss.pos.y += boss_target_pos.unit.y
-                dx = boss_target_pos.x - boss.pos.x
-                dy = boss_target_pos.y - boss.pos.y
-                if compteur % 60 == 0:
-                    projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
+                if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
+                    patterns[current_pattern]["compteur_attaque"] += 1
 
-                    distance = (dx**2 + dy**2) ** 0.5
-                    if distance < 2:
-                        boss.pos.x = boss_target_pos.x
-                        boss.pos.y = boss_target_pos.y
-                        boss_target_x = rd.randint(100,700)
-                        boss_target_y = rd.randint(100,500)
-                        boss_target_pos = Vector2(boss_target_x, boss_target_y)
-                    else:
-                        ux = dx / distance
-                        uy = dy / distance
-                        boss.pos.x += ux * 3
-                        boss.pos.y += uy * 3
-                if has_dashed :
-                    compteur_dash+=1
+                if nb_phase == 2:
+                    boss.pos.x += boss_target_pos.unit.x
+                    boss.pos.y += boss_target_pos.unit.y
+                    dx = boss_target_pos.x - boss.pos.x
+                    dy = boss_target_pos.y - boss.pos.y
+                    if compteur % 60 == 0:
+                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
+
+                        distance = (dx**2 + dy**2) ** 0.5
+                        if distance < 2:
+                            boss.pos.x = boss_target_pos.x
+                            boss.pos.y = boss_target_pos.y
+                            boss_target_x = rd.randint(100,700)
+                            boss_target_y = rd.randint(100,500)
+                            boss_target_pos = Vector2(boss_target_x, boss_target_y)
+                        else:
+                            ux = dx / distance
+                            uy = dy / distance
+                            boss.pos.x += ux * 3
+                            boss.pos.y += uy * 3
+
+                if has_dashed:
+                    compteur_dash += 1
 
                 if draw_what == "line":
-                    if compteur %60 == 0:
+                    if compteur % 60 == 0:
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
-                        patterns["line"]["attaques"]+=1
+                        patterns["line"]["attaques"] += 1
                         patterns["line"]["attacking"] = True
                     for line in LineAttack.lines:
-                        line.upgrade()
+                        line.update()
                         line.draw()
                     if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
-                            draw_what = "NO PATTERN"
-                            patterns["line"]["attacking"] = False
-                            patterns["line"]["compteur_attaque"] = 0
-                    
+                        draw_what = "NO PATTERN"
+                        patterns["line"]["attacking"] = False
+                        patterns["line"]["compteur_attaque"] = 0
+
                 if draw_what == "circle":
-                     if compteur % 10 == 0:
-                         CircleAttack.circles.append(CircleAttack(rect_x+5+player_direction.x*(-2.6), rect_y+5+player_direction.y*(-2.6)))
-                         patterns["circle"]["attacking"] = True
-                         patterns["circle"]["attaques"] += 1
-                    
-                     for circle in CircleAttack.circles:
-                        circle.upgrade()
+                    if compteur % 10 == 0:
+                        CircleAttack.circles.append(CircleAttack(rect_x+5+player_direction.x*(-2.6), rect_y+5+player_direction.y*(-2.6)))
+                        patterns["circle"]["attacking"] = True
+                        patterns["circle"]["attaques"] += 1
+                    for circle in CircleAttack.circles:
+                        circle.update()
                         circle.draw()
-                
-                     if patterns["circle"]["attaques"] >= patterns["circle"]["attaques_max"]:
+                    if patterns["circle"]["attaques"] >= patterns["circle"]["attaques_max"]:
                         draw_what = "NO PATTERN"
                         patterns["circle"]["attacking"] = False
                         patterns["circle"]["compteur_attaque"] = 0
                         CircleAttack.circles.clear()
 
-            if draw_what == "bullets":
-                patterns["bullets"]["attacking"] = True
-                attaques = patterns["bullets"]["attaques"]
-                angles = patterns["bullets"]["angles"]
-                if compteur % 20 == 0:
-                    if attaques < len(angles):
-                        a = angles[attaques]
-                        projectile.append(Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
-                        patterns["bullets"]["attaques"] += 1
-                    else:
-                        draw_what = "NO PATTERN"
-                for obj in projectile:
-                    if obj.nature == RED:
-                        if compteur %20 == 0:
-                            obj.velocity = -4
+                if draw_what == "bullets":
+                    patterns["bullets"]["attacking"] = True
+                    attaques = patterns["bullets"]["attaques"]
+                    angles = patterns["bullets"]["angles"]
+                    if compteur % 20 == 0:
+                        if attaques < len(angles):
+                            a = angles[attaques]
+                            projectile.append(Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
+                            patterns["bullets"]["attaques"] += 1
+                        else:
+                            draw_what = "NO PATTERN"
+                    for obj in projectile:
+                        if obj.nature == RED:
+                            if compteur % 20 == 0:
+                                obj.velocity = -4
 
                 if draw_what == "line2":
-                    if compteur %40 == 0:
+                    if compteur % 40 == 0:
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
-                        patterns["line"]["attaques"]+=1
+                        patterns["line"]["attaques"] += 1
                         patterns["line"]["attacking"] = True
                     for line in LineAttack.lines:
                         line.upgrade()
                         line.draw()
                     if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
-                            draw_what = "NO PATTERN"
-                            patterns["line"]["attacking"] = False
-                            patterns["line"]["compteur_attaque"] = 0
-            
+                        draw_what = "NO PATTERN"
+                        patterns["line"]["attacking"] = False
+                        patterns["line"]["compteur_attaque"] = 0
+
                 if boss.health <= 0:
                     print("\a")
                     print("YOU WON!")
@@ -659,25 +661,30 @@ def main():
                     pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
                     if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
                         projectile.remove(obj)
-                    elif 20<obj.pos.x<780 and 20<obj.pos.y<580:  
+                    elif 20<obj.pos.x<780 and 20<obj.pos.y<580:
                         if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
                             projectile.remove(obj)
+
                 if 1<rect_x<799 and 2<rect_y<598:
                     if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
                         text_collison=base_font.render("collision", False, (0,0,0))
                         fenetre.blit(text_collison, (400,2))
                         if not immortel:
                             alive = False
-                pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
+
+                pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
+
                 if check_surrounding_pixel_colors(fenetre,boss.pos.x,boss.pos.y,BLACK,50):
-                    boss.health-=2
+                    boss.health -= 2
+
                 if boss.health < 500:
                     nb_phase = 2
+
                 text_ticks=base_font.render(f"boss_target: {boss_target_x};{boss_target_y}", False, (0,0,0))
                 fenetre.blit(text_ticks, (500, 2))
                 text_posboss=base_font.render(f"boss_pos: {round(boss.pos.x, 0)};{round(boss.pos.y, 0)}", False, (0,0,0))
                 fenetre.blit(text_posboss, (500, 22))
-                pygame.draw.rect( fenetre, BLUE ,(rect_x,rect_y, 10, 10))
+                pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
 
             else:
                 print("\a")
@@ -686,6 +693,7 @@ def main():
                     print("\a")
                 sleep(0.5)
                 game_running = False  # exit game loop → back to character selection
+
             pygame.display.flip()
             clock.tick(60)
 
