@@ -91,11 +91,18 @@ def main():
             "compteur_attaque": 0,
             "attaques": 0,
             "attaques_max": 20,
-        }
+        },
+        "bullets2":{
+            "attacking": False,
+            "angles": [i*(m.pi/12) for i in range(24)],
+            "attaques": 0,
+            "attaques_max": 24,
+            "compteur_attaque":0
+        },
     }
 
     phase_1 = ["circle", "bullets","line"]
-    phase_2 = ["line2"]
+    phase_2 = ["line2", "bullets2"]
     alive = True
     immortel = False
 
@@ -570,19 +577,23 @@ def main():
                     dy = boss_target_pos.y - boss.pos.y
                     if compteur % 60 == 0:
                         projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
-
-                        distance = (dx**2 + dy**2) ** 0.5
-                        if distance < 2:
-                            boss.pos.x = boss_target_pos.x
-                            boss.pos.y = boss_target_pos.y
-                            boss_target_x = rd.randint(100,700)
-                            boss_target_y = rd.randint(100,500)
-                            boss_target_pos = Vector2(boss_target_x, boss_target_y)
-                        else:
-                            ux = dx / distance
-                            uy = dy / distance
-                            boss.pos.x += ux * 3
-                            boss.pos.y += uy * 3
+                    if compteur % 20 == 0:
+                        CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
+                    for circle in CircleAttack.circles:
+                        circle.update()
+                        circle.draw()
+                    distance = (dx**2 + dy**2) ** 0.5
+                    if distance < 2:
+                        boss.pos.x = boss_target_pos.x
+                        boss.pos.y = boss_target_pos.y
+                        boss_target_x = rd.randint(100,700)
+                        boss_target_y = rd.randint(100,500)
+                        boss_target_pos = Vector2(boss_target_x, boss_target_y)
+                    else:
+                        ux = dx / distance
+                        uy = dy / distance
+                        boss.pos.x += ux * 3
+                        boss.pos.y += uy * 3
 
                 if has_dashed:
                     compteur_dash += 1
@@ -630,6 +641,22 @@ def main():
                         if obj.nature == RED:
                             if compteur % 20 == 0:
                                 obj.velocity = -4
+                if draw_what == "bullets2":
+                    patterns["bullets2"]["attacking"] = True
+                    attaques = patterns["bullets2"]["attaques"]
+                    angles = patterns["bullets2"]["angles"]
+                    if compteur % 20 == 0:
+                        if attaques < len(angles):
+                            a = angles[attaques]
+                            projectile.append(Bullet(Vector2(rect_x + 200*m.cos(a), rect_y + 200*m.sin(a)),Vector2(m.cos(a), m.sin(a)),RED,0))
+                            projectile.append(Bullet(Vector2(rect_x + 200*m.cos(-a), rect_y + 200*m.sin(-a)),Vector2(m.cos(-a), m.sin(-a)),RED,0))
+                            patterns["bullets2"]["attaques"] += 1
+                        else:
+                            draw_what = "NO PATTERN"
+                    for obj in projectile:
+                        if obj.nature == RED:
+                            if compteur % 20 == 0:
+                                obj.velocity = -4
 
                 if draw_what == "line2":
                     if compteur % 40 == 0:
@@ -638,14 +665,14 @@ def main():
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
                         patterns["line"]["attaques"] += 1
-                        patterns["line"]["attacking"] = True
+                        patterns["line2"]["attacking"] = True
                     for line in LineAttack.lines:
-                        line.upgrade()
+                        line.update()
                         line.draw()
-                    if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
+                    if patterns["line2"]["attaques"] >= patterns["line2"]["attaques_max"]:
                         draw_what = "NO PATTERN"
-                        patterns["line"]["attacking"] = False
-                        patterns["line"]["compteur_attaque"] = 0
+                        patterns["line2"]["attacking"] = False
+                        patterns["line2"]["compteur_attaque"] = 0
 
                 if boss.health <= 0:
                     print("\a")
@@ -665,7 +692,7 @@ def main():
                         if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
                             projectile.remove(obj)
 
-                if 1<rect_x<799 and 2<rect_y<598:
+                if 5<rect_x<795 and 5<rect_y<595:
                     if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
                         text_collison=base_font.render("collision", False, (0,0,0))
                         fenetre.blit(text_collison, (400,2))
