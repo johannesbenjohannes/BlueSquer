@@ -72,7 +72,6 @@ def main():
     #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
 
     nb_phase = 2 # Nombre de la phase actuelle
-    nb_phase = 2 # Nombre de la phase actuelle
 
     current_pattern = "NO PATTERN" # Pattern actuel
     previous_pattern = "NO PATTERN"
@@ -484,6 +483,60 @@ if __name__=="__main__":
         if event.type == pygame.MOUSEBUTTONDOWN:
             direction = Vector2(dx,dy).unit
         else:
+
+    compteur = 0 # Compteur global des ticks
+
+
+    compteur = 0 # Compteur global des ticks
+
+    #line_attacking = False  Etat d'attaque de ligne 
+    #circle_attacking = False #Etat d'attaque de cercle
+
+    #compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    #compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
+
+    #ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
+    #ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
+
+    #attaques_ligne = 0 # Compteur des attaques  ligne 
+    #attaques_cercle = 0 #compteur des attaques cercle
+
+    #drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
+    #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
+
+    nb_phase = 2 # Nombre de la phase actuelle
+
+    current_pattern = "NO PATTERN" # Pattern actuel
+    previous_pattern = "NO PATTERN"
+    draw_what = "NO PATTERN" # Que doit-on dessiner
+
+
+    projectile = []
+
+    #line_attacking = False  Etat d'attaque de ligne 
+    #circle_attacking = False #Etat d'attaque de cercle
+
+    #compteur_attaque_ligne = 0 # Compteur de tick lors de l'attaque de la ligne 
+    #compteur_attaque_cercle = 0 # Compteur tick lors de l'attaque de la lignefenêtre
+
+    #ispattern_ligne = False # Est-ce que le pattern en cours est la ligne ?
+    #ispattern_cercle = True # Est-ce que le pattern en cours est le cercle ?
+
+    #attaques_ligne = 0 # Compteur des attaques  ligne 
+    #attaques_cercle = 0 #compteur des attaques cercle
+
+    #drawcircle = False # Est-ce qu'il faut dessiner le cercle actuellement ?
+    #drawline = False # Est-ce qu'il faut dessiner la ligne actuellement ?
+
+    nb_phase = 2 # Nombre de la phase actuelle
+
+    current_pattern = "NO PATTERN" # Pattern actuel
+    previous_pattern = "NO PATTERN"
+    draw_what = "NO PATTERN" # Que doit-on dessiner
+
+
+    projectile = []
+
             direction = Vector2(0,0)
             
             
