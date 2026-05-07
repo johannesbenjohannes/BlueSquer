@@ -431,7 +431,7 @@ def main():
         boss_target_pos = Vector2(1,1)
         player_direction = Vector2(1,1)
         compteur = 0
-        nb_phase = 1
+        nb_phase = 3
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
         draw_what = "NO PATTERN"
@@ -451,7 +451,7 @@ def main():
         has_shot = False
         compteur_shot = 30
         speed = 3
-        boss = Ennemy(Vector2(400,300),50,50,600)
+        boss = Ennemy(Vector2(400,300),50,50,299)
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -531,45 +531,55 @@ def main():
 
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
                 pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
-                pygame.draw.rect(fenetre, LIGHT_BLUE, (50,50,round(compteur_dash/2),50))  # dash bar
-                pygame.draw.rect(fenetre, BLACK, (45,45,70,55), 5)  # dash box
+                pygame.draw.rect(fenetre, LIGHT_BLUE, (rect_x-3.5,rect_y+12,round(compteur_dash/8),6))  # dash bar
+                pygame.draw.rect(fenetre, BLACK, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
                 pygame.draw.rect(fenetre, LIGHT_BRASS, (45,110,30,15))  # casing
                 pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
                 pygame.draw.rect(fenetre, SALMON, (100,550,boss.health,40))
-
-                if current_pattern == "NO PATTERN":
-                    print("Y'a pas de pattern là, on choisit")
-                    if nb_phase == 1:
-                        current_pattern = rd.choice(phase_1)
-                        while current_pattern == previous_pattern:
+                if nb_phase !=3:
+                    if current_pattern == "NO PATTERN":
+                        print("Y'a pas de pattern là, on choisit")
+                        if nb_phase == 1:
                             current_pattern = rd.choice(phase_1)
-                        print(current_pattern)
+                            while current_pattern == previous_pattern:
+                                current_pattern = rd.choice(phase_1)
+                            print(current_pattern)
+                            patterns[current_pattern]["attaques"] = 0
+                            previous_pattern = current_pattern
+                        elif nb_phase == 2:
+                            current_pattern = rd.choice(phase_2)
+                            print(current_pattern)
+                            patterns[current_pattern]["attaques"] = 0
+                            boss_target_x = rd.randint(100,700)
+                            boss_target_y = rd.randint(100,500)
+                            boss_target_pos = Vector2(boss_target_x, boss_target_y)
+                            print(boss_target_pos)
+                        
+
+
+                    if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
+                        print("YEP CFINI")
                         patterns[current_pattern]["attaques"] = 0
-                        previous_pattern = current_pattern
-                    elif nb_phase == 2:
-                        current_pattern = rd.choice(phase_2)
-                        print(current_pattern)
-                        patterns[current_pattern]["attaques"] = 0
-                        boss_target_x = rd.randint(100,700)
-                        boss_target_y = rd.randint(100,500)
-                        boss_target_pos = Vector2(boss_target_x, boss_target_y)
-                        print(boss_target_pos)
+                        patterns[current_pattern]["attacking"] = False
+                        current_color = fenetre.get_at((int(rect_x)+5, int(rect_y+5)))
+                        patterns[current_pattern]["compteur_attaque"] = 0
+                        current_pattern = "NO PATTERN"
 
-                if patterns[current_pattern]["attaques"] == patterns[current_pattern]["attaques_max"]:
-                    print("YEP CFINI")
-                    patterns[current_pattern]["attaques"] = 0
-                    patterns[current_pattern]["attacking"] = False
-                    current_color = fenetre.get_at((int(rect_x)+5, int(rect_y+5)))
-                    patterns[current_pattern]["compteur_attaque"] = 0
-                    current_pattern = "NO PATTERN"
+                    if compteur % 60 == 0 and current_pattern != "NO PATTERN":
+                        draw_what = current_pattern
 
-                if compteur % 60 == 0 and current_pattern != "NO PATTERN":
-                    draw_what = current_pattern
-
-                if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
-                    patterns[current_pattern]["compteur_attaque"] += 1
-
+                    if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
+                        patterns[current_pattern]["compteur_attaque"] += 1
+                else:
+                    if compteur % round(boss.health/10) == 0:
+                        for i in range(12):
+                            CircleAttack.circles.append(CircleAttack(rd.randint(100,700), rd.randint(100,500)))
+                    if compteur % 6 == 0:
+                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-40,40),boss.pos.y+25-rect_y+5+rd.randint(-40,40)).unit, RED,-4))
+                    for circle in CircleAttack.circles:
+                        circle.update()
+                        circle.draw()
                 if nb_phase == 2:
                     boss.pos.x += boss_target_pos.unit.x
                     boss.pos.y += boss_target_pos.unit.y
@@ -702,10 +712,15 @@ def main():
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
 
                 if check_surrounding_pixel_colors(fenetre,boss.pos.x,boss.pos.y,BLACK,50):
-                    boss.health -= 2
+                    boss.health -= 4
 
                 if boss.health < 500:
                     nb_phase = 2
+                if boss.health < 300:
+                    nb_phase = 3
+                    boss_target_x = 400
+                    boss_target_y = 300
+                    boss_target_pos = Vector2(boss_target_x, boss_target_y)
 
                 text_ticks=base_font.render(f"boss_target: {boss_target_x};{boss_target_y}", False, (0,0,0))
                 fenetre.blit(text_ticks, (500, 2))
