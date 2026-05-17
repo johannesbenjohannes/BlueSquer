@@ -37,13 +37,12 @@ def main():
     
 
     LARGEUR = 800
-    compteur_attaque_ligne = 0
-    compteur_attaque_cercle = 0
+
     HAUTEUR = 600
     
     rect_x = 10
     rect_y = 10
-    moving = False
+
 
     past_rect_x = 0
     past_rect_y = 0
@@ -431,7 +430,7 @@ def main():
         boss_target_pos = Vector2(1,1)
         player_direction = Vector2(1,1)
         compteur = 0
-        nb_phase = 3
+        nb_phase = 1
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
         draw_what = "NO PATTERN"
@@ -451,7 +450,7 @@ def main():
         has_shot = False
         compteur_shot = 30
         speed = 3
-        boss = Ennemy(Vector2(400,300),50,50,299)
+        boss = Ennemy(Vector2(400,300),50,50,600)
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -574,9 +573,9 @@ def main():
                 else:
                     if compteur % round(boss.health/10) == 0:
                         for i in range(12):
-                            CircleAttack.circles.append(CircleAttack(rd.randint(100,700), rd.randint(100,500)))
+                            CircleAttack.circles.append(CircleAttack(rd.randint(10,790), rd.randint(10,590)))
                     if compteur % 6 == 0:
-                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-40,40),boss.pos.y+25-rect_y+5+rd.randint(-40,40)).unit, RED,-4))
+                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-100,100),boss.pos.y+25-rect_y+5+rd.randint(-100,100)).unit, RED,-4))
                     for circle in CircleAttack.circles:
                         circle.update()
                         circle.draw()
@@ -702,8 +701,8 @@ def main():
                         if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
                             projectile.remove(obj)
 
-                if 5<rect_x<795 and 5<rect_y<595:
-                    if check_surrounding_pixel_colors(fenetre,rect_x,rect_y,RED,10):
+                if 0<rect_x+5<800 and 0<rect_y+5<600:
+                    if check_surrounding_pixel_colors(fenetre,rect_x+5,rect_y+5,RED,10):
                         text_collison=base_font.render("collision", False, (0,0,0))
                         fenetre.blit(text_collison, (400,2))
                         if not immortel:
