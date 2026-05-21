@@ -33,8 +33,6 @@ def main():
     SALMON = (255, 99, 85)
     DARK_SALMON = (200, 60, 85)
     BORDEAUX = (159, 7, 18)
-    GRAY = (128,128,128)
-    
     speed = 3
     
 
@@ -197,8 +195,11 @@ def main():
     boss = Ennemy(Vector2(400,300),50,50,600)
     fenetre.fill(WHITE)
 
+    restart_game = False
+
     # --- 2. Start Menu ---
     title_font = pygame.font.SysFont('Comic Sans MS', 64, bold=True)
+    big_font   = pygame.font.SysFont('Comic Sans MS', 52, bold=True)
     button_font = pygame.font.SysFont('Comic Sans MS', 28)
     label_font  = pygame.font.SysFont('Comic Sans MS', 20)
 
@@ -209,7 +210,6 @@ def main():
     card_left_x  = LARGEUR // 2 - cards_total_w // 2
     card_right_x = card_left_x + CARD_W + card_gap
     card_y = HAUTEUR // 2 + 10
-
     def draw_squer_preview(cx, cy, selected):
         color = LIGHT_BLUE if selected else BLUE
         pygame.draw.rect(fenetre, color, (cx - 18, cy - 18, 36, 36), border_radius=4)
@@ -364,6 +364,98 @@ def main():
 
         return upd_rects, btn_rect
 
+    # --- End screens ---
+    def draw_game_over_screen(offset, score):
+        """Game Over / 'Git Gud!' screen — red-tinted dot grid, same style as menus."""
+        # Animated background, red tint
+        fenetre.fill(WHITE)
+        spacing = 40
+        for gx in range(-spacing, LARGEUR + spacing, spacing):
+            for gy in range(-spacing, HAUTEUR + spacing, spacing):
+                x = (gx - offset) % (LARGEUR + spacing)
+                y = (gy + offset) % (HAUTEUR + spacing)
+                pygame.draw.circle(fenetre, (255, 210, 210), (x, y), 2)
+
+        # "Git Gud!" title
+        git_surf = big_font.render("Git Gud!", True, RED)
+        git_rect = git_surf.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 - 110))
+        fenetre.blit(git_surf, git_rect)
+        pygame.draw.line(fenetre, SALMON,
+                         (git_rect.left + 10, git_rect.bottom + 6),
+                         (git_rect.right - 10, git_rect.bottom + 6), 3)
+
+        # Score
+        score_label = label_font.render("Score", True, (160, 160, 160))
+        fenetre.blit(score_label, score_label.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 - 28)))
+        score_surf = title_font.render(str(score), True, RED)
+        fenetre.blit(score_surf, score_surf.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 + 30)))
+
+        mx, my = pygame.mouse.get_pos()
+
+        # Retry button
+        btn_w, btn_h = 200, 52
+        retry_rect = pygame.Rect(LARGEUR // 2 - btn_w // 2 - 110, HAUTEUR // 2 + 120, btn_w, btn_h)
+        retry_hov = retry_rect.collidepoint(mx, my)
+        pygame.draw.rect(fenetre, SALMON if retry_hov else RED, retry_rect, border_radius=6)
+        pygame.draw.rect(fenetre, BLACK, retry_rect, 2, border_radius=6)
+        retry_text = button_font.render("PLAY AGAIN", True, WHITE)
+        fenetre.blit(retry_text, retry_text.get_rect(center=retry_rect.center))
+
+        # Quit button
+        quit_rect = pygame.Rect(LARGEUR // 2 - btn_w // 2 + 110, HAUTEUR // 2 + 120, btn_w, btn_h)
+        quit_hov = quit_rect.collidepoint(mx, my)
+        pygame.draw.rect(fenetre, (200, 200, 200) if quit_hov else WHITE, quit_rect, border_radius=6)
+        pygame.draw.rect(fenetre, BLACK, quit_rect, 2, border_radius=6)
+        quit_text = button_font.render("QUIT", True, BLACK)
+        fenetre.blit(quit_text, quit_text.get_rect(center=quit_rect.center))
+
+        return retry_rect, quit_rect
+
+    def draw_win_screen(offset, score):
+        """Victory screen — blue dot grid."""
+        fenetre.fill(WHITE)
+        spacing = 40
+        for gx in range(-spacing, LARGEUR + spacing, spacing):
+            for gy in range(-spacing, HAUTEUR + spacing, spacing):
+                x = (gx - offset) % (LARGEUR + spacing)
+                y = (gy + offset) % (HAUTEUR + spacing)
+                pygame.draw.circle(fenetre, (200, 230, 255), (x, y), 2)
+
+        # "You Won!" title
+        win_surf = big_font.render("You Won!", True, BLUE)
+        win_rect = win_surf.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 - 110))
+        fenetre.blit(win_surf, win_rect)
+        pygame.draw.line(fenetre, LIGHT_BLUE,
+                         (win_rect.left + 10, win_rect.bottom + 6),
+                         (win_rect.right - 10, win_rect.bottom + 6), 3)
+
+        # Score
+        score_label = label_font.render("your score", True, (160, 160, 160))
+        fenetre.blit(score_label, score_label.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 - 28)))
+        score_surf = title_font.render(str(score), True, BLUE)
+        fenetre.blit(score_surf, score_surf.get_rect(center=(LARGEUR // 2, HAUTEUR // 2 + 30)))
+
+        mx, my = pygame.mouse.get_pos()
+
+        # Play again button
+        btn_w, btn_h = 200, 52
+        again_rect = pygame.Rect(LARGEUR // 2 - btn_w // 2 - 110, HAUTEUR // 2 + 120, btn_w, btn_h)
+        again_hov = again_rect.collidepoint(mx, my)
+        pygame.draw.rect(fenetre, LIGHT_BLUE if again_hov else BLUE, again_rect, border_radius=6)
+        pygame.draw.rect(fenetre, BLACK, again_rect, 2, border_radius=6)
+        again_text = button_font.render("↺  PLAY AGAIN", True, WHITE)
+        fenetre.blit(again_text, again_text.get_rect(center=again_rect.center))
+
+        # Quit button
+        quit_rect = pygame.Rect(LARGEUR // 2 - btn_w // 2 + 110, HAUTEUR // 2 + 120, btn_w, btn_h)
+        quit_hov = quit_rect.collidepoint(mx, my)
+        pygame.draw.rect(fenetre, (200, 200, 200) if quit_hov else WHITE, quit_rect, border_radius=6)
+        pygame.draw.rect(fenetre, BLACK, quit_rect, 2, border_radius=6)
+        quit_text = button_font.render("QUIT", True, BLACK)
+        fenetre.blit(quit_text, quit_text.get_rect(center=quit_rect.center))
+
+        return again_rect, quit_rect
+
     menu_offset = 0
     player_character = "NONE"
 
@@ -372,6 +464,8 @@ def main():
     # On death, loops back to character selection menu
     # -------------------------------------------------------
     show_main_menu = True
+    restart_game = False
+
     while True:
 
         # --- Menu 1: Main menu ---
@@ -393,47 +487,54 @@ def main():
             show_main_menu = False
 
         # --- Menu 2: Character selection ---
-        selected_char = "NONE"
-        in_char = True
-        while in_char:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    left_rect, right_rect, btn_rect = draw_start_menu(menu_offset, selected_char)
-                    if left_rect.collidepoint(event.pos):
-                        selected_char = "Blue Squer"
-                    elif right_rect.collidepoint(event.pos):
-                        selected_char = "Blue Lobsta"
-                    elif btn_rect.collidepoint(event.pos) and selected_char != "NONE":
-                        player_character = selected_char
-                        in_char = False
-            draw_start_menu(menu_offset, selected_char)
-            menu_offset = (menu_offset + 1) % 40
-            pygame.display.flip()
-            clock.tick(60)
+        if not restart_game:
+            selected_char = "NONE"
+            in_char = True
+
+            while in_char:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        left_rect, right_rect, btn_rect = draw_start_menu(menu_offset, selected_char)
+                        if left_rect.collidepoint(event.pos):
+                            selected_char = "Blue Squer"
+                        elif right_rect.collidepoint(event.pos):
+                            selected_char = "Blue Lobsta"
+                        elif btn_rect.collidepoint(event.pos) and selected_char != "NONE":
+                            player_character = selected_char
+                            in_char = False
+                draw_start_menu(menu_offset, selected_char)
+                menu_offset = (menu_offset + 1) % 40
+                pygame.display.flip()
+                clock.tick(60)
+            player_character = selected_char
 
         # --- Menu 3: Upgrade selection ---
-        selected_upd = 0
-        in_upd = True
-        while in_upd:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    upd_rects, btn_rect = draw_upgrade_menu(menu_offset, selected_upd)
-                    for i, rect in enumerate(upd_rects):
-                        if rect.collidepoint(event.pos):
-                            selected_upd = i + 1
-                    if btn_rect.collidepoint(event.pos) and selected_upd != 0:
-                        nb_upgrade = selected_upd
-                        in_upd = False
-            draw_upgrade_menu(menu_offset, selected_upd)
-            menu_offset = (menu_offset + 1) % 40
-            pygame.display.flip()
-            clock.tick(60)
+        # --- Menu 3: Upgrade selection ---
+        if not restart_game:
+            selected_upd = 0
+            in_upd = True
+
+            while in_upd:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        upd_rects, btn_rect = draw_upgrade_menu(menu_offset, selected_upd)
+                        for i, rect in enumerate(upd_rects):
+                            if rect.collidepoint(event.pos):
+                                selected_upd = i + 1
+                        if btn_rect.collidepoint(event.pos) and selected_upd != 0:
+                            nb_upgrade = selected_upd
+                            in_upd = False
+                draw_upgrade_menu(menu_offset, selected_upd)
+                menu_offset = (menu_offset + 1) % 40
+                pygame.display.flip()
+                clock.tick(60)
+            nb_upgrade = selected_upd
 
         # --- Reset game state before each run ---
         rect_x = 10
@@ -443,6 +544,7 @@ def main():
         boss_target_x = 0
         boss_target_y = 0
         boss_target_pos = Vector2(1,1)
+        score_attaques_boss = 0
         player_direction = Vector2(1,1)
         compteur = 0
         nb_phase = 1
@@ -470,6 +572,7 @@ def main():
 
         # --- 3. Boucle principale ---
         game_running = True
+        end_state = None   # "death" or "win"
     
         while game_running:
 
@@ -496,15 +599,15 @@ def main():
             elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
                 rect_x -= speed*0.6
                 rect_y -= speed*0.6
-            elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 785 and rect_y > 0:
+            elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 790 and rect_y > 0:
                 rect_x += speed*0.6
                 rect_y -= speed*0.6
-            elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 785 and rect_y < 590:
+            elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 790 and rect_y < 590:
                 rect_x += speed*0.6
                 rect_y += speed*0.6
             elif touches[pygame.K_q] and rect_x > 0:
                 rect_x -= speed
-            elif touches[pygame.K_d] and rect_x < 785:
+            elif touches[pygame.K_d] and rect_x < 790:
                 rect_x += speed
             elif touches[pygame.K_s] and rect_y < 590:
                 rect_y += speed
@@ -551,7 +654,7 @@ def main():
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
                 pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
                 pygame.draw.rect(fenetre, LIGHT_BLUE, (rect_x-3.5,rect_y+12,round(compteur_dash/8),6))  # dash bar
-                pygame.draw.rect(fenetre, GRAY, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
+                pygame.draw.rect(fenetre, BLACK, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
                 pygame.draw.rect(fenetre, LIGHT_BRASS, (45,110,30,15))  # casing
                 pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
@@ -704,14 +807,8 @@ def main():
                         patterns["line2"]["compteur_attaque"] = 0
 
                 if boss.health <= 0:
-                    print("\a")
-                    print("YOU WON!")
-                    if sys.platform == "darwin":
-                        os.system("say you won")
-                        print("\a")
-                    sleep(0.5)
-                    print("\a")
-                    quit()
+                    end_state = "win"
+                    game_running = False
 
                 if toggled_upgrade is not False:
                     if toggled_upgrade.toggled is True:
@@ -749,16 +846,52 @@ def main():
                 text_score=base_font.render(f"Score: {round(compteur/3)+score_attaques_boss}", False, (0,0,0))
                 fenetre.blit(text_score, (600, 2))
                 pygame.draw.rect(fenetre, player_color, (rect_x, rect_y, 10, 10))
+
             else:
-                print("\a")
-                if sys.platform == "darwin":
-                    os.system("say game over")
-                    print("\a")
-                sleep(0.5)
-                game_running = False  # exit game loop → back to character selection
+                end_state = "death"
+                game_running = False
 
             pygame.display.flip()
             clock.tick(60)
+
+        # --- End screen ---
+        final_score = round(compteur / 3) + score_attaques_boss
+        end_offset = 0
+        in_end = True
+        while in_end:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if end_state == "death":
+                        retry_rect, quit_rect = draw_game_over_screen(end_offset, final_score)
+                        if retry_rect.collidepoint(event.pos):
+                            restart_game = True
+                            in_end = False
+                        elif quit_rect.collidepoint(event.pos):
+                            pygame.quit()
+                            sys.exit()
+                    else:
+                        again_rect, quit_rect = draw_win_screen(end_offset, final_score)
+                        if again_rect.collidepoint(event.pos):
+                            restart_game = True
+                            in_end = False
+                        elif quit_rect.collidepoint(event.pos):
+                            pygame.quit()
+                            sys.exit()
+
+            if end_state == "death":
+                draw_game_over_screen(end_offset, final_score)
+            else:
+                draw_win_screen(end_offset, final_score)
+
+            end_offset = (end_offset + 1) % 40
+            pygame.display.flip()
+            clock.tick(60)
+        show_main_menu = False
+
+        # After end screen, loop back to character selection (show_main_menu stays False)
 
 if __name__=="__main__":
     main()
