@@ -33,6 +33,7 @@ def main():
     SALMON = (255, 99, 85)
     DARK_SALMON = (200, 60, 85)
     BORDEAUX = (159, 7, 18)
+    GRAY = (128, 128, 128)
     speed = 3
     
 
@@ -654,7 +655,7 @@ def main():
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
                 pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
                 pygame.draw.rect(fenetre, LIGHT_BLUE, (rect_x-3.5,rect_y+12,round(compteur_dash/8),6))  # dash bar
-                pygame.draw.rect(fenetre, BLACK, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
+                pygame.draw.rect(fenetre, GRAY, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
                 pygame.draw.rect(fenetre, LIGHT_BRASS, (45,110,30,15))  # casing
                 pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
