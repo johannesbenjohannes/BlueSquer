@@ -33,6 +33,8 @@ def main():
     SALMON = (255, 99, 85)
     DARK_SALMON = (200, 60, 85)
     BORDEAUX = (159, 7, 18)
+    GRAY = (128,128,128)
+    
     speed = 3
     
 
@@ -431,7 +433,7 @@ def main():
         boss_target_pos = Vector2(1,1)
         player_direction = Vector2(1,1)
         compteur = 0
-        nb_phase = 3
+        nb_phase = 1
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
         draw_what = "NO PATTERN"
@@ -451,7 +453,7 @@ def main():
         has_shot = False
         compteur_shot = 30
         speed = 3
-        boss = Ennemy(Vector2(400,300),50,50,299)
+        boss = Ennemy(Vector2(400,300),50,50,600)
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -532,7 +534,7 @@ def main():
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
                 pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
                 pygame.draw.rect(fenetre, LIGHT_BLUE, (rect_x-3.5,rect_y+12,round(compteur_dash/8),6))  # dash bar
-                pygame.draw.rect(fenetre, BLACK, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
+                pygame.draw.rect(fenetre, GRAY, (rect_x-3.5,rect_y+12,17,7), 2)  # dash box
                 pygame.draw.rect(fenetre, LIGHT_BRASS, (45,110,30,15))  # casing
                 pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
@@ -574,7 +576,7 @@ def main():
                 else:
                     if compteur % round(boss.health/10) == 0:
                         for i in range(12):
-                            CircleAttack.circles.append(CircleAttack(rd.randint(100,700), rd.randint(100,500)))
+                            CircleAttack.circles.append(CircleAttack(rd.randint(10,790), rd.randint(10,590)))
                     if compteur % 6 == 0:
                         projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-40,40),boss.pos.y+25-rect_y+5+rd.randint(-40,40)).unit, RED,-4))
                     for circle in CircleAttack.circles:
