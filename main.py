@@ -11,7 +11,11 @@ pygame.init()
 clock = pygame.time.Clock()
 pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
-
+pygame.mixer.init()
+loop1 = "loop1.wav"
+loop2 = "loop2.wav"
+transition = "transition.wav"
+pygame.mixer.music.load(loop1)
 def check_surrounding_pixel_colors(surface,x,y,target,n):
     for i in range(int(x),int(x+n)):
         for j in range(int(y),int(y+n)):
@@ -450,6 +454,8 @@ def main():
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
         draw_what = "NO PATTERN"
+        music_change = False
+        first_move = True
         projectile.clear()
         LineAttack.lines.clear()
         CircleAttack.circles.clear()
@@ -470,7 +476,7 @@ def main():
 
         # --- 3. Boucle principale ---
         game_running = True
-    
+
         while game_running:
 
             compteur += 1
@@ -488,6 +494,8 @@ def main():
                     projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK))
                     has_shot = True
                     compteur_shot = 0
+                if event.type == 1:
+                    pygame.mixer.music.load(loop2)
 
             touches = pygame.key.get_pressed()
             if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
@@ -541,12 +549,27 @@ def main():
             if has_dashed == True:
                 if compteur_dash == 120:
                     has_dashed = False
+            
+          
 
             fenetre.fill(WHITE)
 
             boss.draw()
 
             if alive:
+                  #section musique
+
+                if pygame.mixer.music.get_busy()!= True:
+                    pygame.mixer.music.play()
+                if nb_phase == 2:
+                    if music_change!= True:
+                        pygame.mixer.music.stop()
+                        pygame.mixer.music.load(transition)
+                        music_change = True
+                        pygame.mixer.music.set_endevent(1)
+
+ 
+
 
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
                 pygame.draw.circle(fenetre, WHITE, (rect_x+5, rect_y+5,), 200, 1)
@@ -570,10 +593,12 @@ def main():
                             current_pattern = rd.choice(phase_2)
                             print(current_pattern)
                             patterns[current_pattern]["attaques"] = 0
-                            boss_target_x = rd.randint(100,700)
-                            boss_target_y = rd.randint(100,500)
-                            boss_target_pos = Vector2(boss_target_x, boss_target_y)
-                            print(boss_target_pos)
+                            if first_move:
+                                boss_target_x = rd.randint(100,700)
+                                boss_target_y = rd.randint(100,500)
+                                boss_target_pos = Vector2(boss_target_x, boss_target_y)
+                                first_move = False
+
                         
 
 
@@ -591,7 +616,7 @@ def main():
                     if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                         patterns[current_pattern]["compteur_attaque"] += 1
                 else:
-                    if compteur % round(boss.health/10) == 0:
+                    if compteur % (round(boss.health/10)+10) == 0:
                         for i in range(12):
                             CircleAttack.circles.append(CircleAttack(rd.randint(10,790), rd.randint(10,590)))
                     if compteur % 6 == 0:
@@ -600,8 +625,6 @@ def main():
                         circle.update()
                         circle.draw()
                 if nb_phase == 2:
-                    boss.pos.x += boss_target_pos.unit.x
-                    boss.pos.y += boss_target_pos.unit.y
                     dx = boss_target_pos.x - boss.pos.x
                     dy = boss_target_pos.y - boss.pos.y
                     if compteur % 60 == 0:
@@ -621,8 +644,8 @@ def main():
                     else:
                         ux = dx / distance
                         uy = dy / distance
-                        boss.pos.x += ux * 3
-                        boss.pos.y += uy * 3
+                        boss.pos.x += ux * 1
+                        boss.pos.y += uy * 1
 
                 if has_dashed:
                     compteur_dash += 1
@@ -731,6 +754,7 @@ def main():
                     if check_surrounding_pixel_colors(fenetre,rect_x+5,rect_y+5,RED,10):
                         if not immortel:
                             alive = False
+                            pygame.mixer.music.stop()
 
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
 
@@ -746,8 +770,8 @@ def main():
                     boss_target_y = 300
                     boss_target_pos = Vector2(boss_target_x, boss_target_y)
 
-                text_score=base_font.render(f"Score: {round(compteur/3)+score_attaques_boss}", False, (0,0,0))
-                fenetre.blit(text_score, (600, 2))
+                # text_score=base_font.render(f"Score: {round(compteur/3)+score_attaques_boss}", False, (0,0,0))
+                # fenetre.blit(text_score, (600, 2))
                 pygame.draw.rect(fenetre, player_color, (rect_x, rect_y, 10, 10))
             else:
                 print("\a")
