@@ -12,6 +12,7 @@ clock = pygame.time.Clock()
 pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
 
+
 def check_surrounding_pixel_colors(surface,x,y,target,n):
     for i in range(int(x),int(x+n)):
         for j in range(int(y),int(y+n)):
