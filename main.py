@@ -179,6 +179,7 @@ def main():
         }
     }
     dash_abil = Dash(player)
+    DARK_RED = (200,0,0)
     
     player_speed = 3
     
@@ -352,7 +353,7 @@ def main():
         name_l = button_font.render("Blue Squer", True, BLUE if squer_sel else BLACK)
         fenetre.blit(name_l, name_l.get_rect(center=(card_left_x + CARD_W // 2, card_y + CARD_H - 35)))
         if squer_sel:
-            tick_l = label_font.render("✓ selected", True, BLUE)
+            tick_l = label_font.render("X selected", True, BLUE)
             fenetre.blit(tick_l, tick_l.get_rect(center=(card_left_x + CARD_W // 2, card_y + CARD_H - 12)))
 
         # --- Right card: Blue Lobsta ---
@@ -366,7 +367,7 @@ def main():
         name_r = button_font.render("Blue Lobsta", True, BLUE if lobsta_sel else BLACK)
         fenetre.blit(name_r, name_r.get_rect(center=(card_right_x + CARD_W // 2, card_y + CARD_H - 35)))
         if lobsta_sel:
-            tick_r = label_font.render("✓ selected", True, BLUE)
+            tick_r = label_font.render("X selected", True, BLUE)
             fenetre.blit(tick_r, tick_r.get_rect(center=(card_right_x + CARD_W // 2, card_y + CARD_H - 12)))
 
         # --- Next button (greyed out until a character is picked) ---
@@ -401,7 +402,7 @@ def main():
         mx, my = pygame.mouse.get_pos()
         upd_rects = []
 
-        for i, label in enumerate(["Upgrade 1", "Upgrade 2", "Upgrade 3"]):
+        for i, label in enumerate(["Upgrade 1", "Charge shot", "Upgrade 3"]):
             rx = upd_start_x + i * (UPD_W + upd_gap)
             rect = pygame.Rect(rx, upd_y, UPD_W, UPD_H)
             upd_rects.append(rect)
@@ -416,7 +417,7 @@ def main():
             fenetre.blit(lbl_surf, lbl_surf.get_rect(center=rect.center))
 
             if sel:
-                tick = label_font.render("✓", True, BLUE)
+                tick = label_font.render("X", True, BLUE)
                 fenetre.blit(tick, tick.get_rect(center=(rect.centerx, rect.bottom - 14)))
 
         # Play button
@@ -533,10 +534,12 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
-        immortel = False
+        immortel = True  #fix
         has_dashed = False
         compteur_dash = 120
         has_shot = False
+        compteur_charge = 0
+        charging = False
         compteur_shot = 30
         player["speed"] = 3
         boss = Ennemy(Vector2(400,300),50,50,600)
@@ -553,14 +556,28 @@ def main():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
-                    mouse_x = pygame.mouse.get_pos()[0]
-                    mouse_y = pygame.mouse.get_pos()[1]
-                    dx = mouse_x-rect_x
-                    dy = mouse_y - rect_y
-                    projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK))
-                    has_shot = True
-                    compteur_shot = 0
+                if nb_upgrade ==2:
+                        if event.type ==pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
+                            charging = True
+                        if event.type == pygame.MOUSEBUTTONUP and charging == True:
+                            mouse_x = pygame.mouse.get_pos()[0]
+                            mouse_y = pygame.mouse.get_pos()[1]
+                            dx = mouse_x-rect_x
+                            dy = mouse_y - rect_y
+                            projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK, compteur_charge/10))
+                            has_shot = True
+                            charging = False 
+                            compteur_charge = 0
+                            compteur_shot = 0
+                else:
+                    if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
+                        mouse_x = pygame.mouse.get_pos()[0]
+                        mouse_y = pygame.mouse.get_pos()[1]
+                        dx = mouse_x-rect_x
+                        dy = mouse_y - rect_y
+                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK))
+                        has_shot = True
+                        compteur_shot = 0
                 if event.type == 1:
                     pygame.mixer.music.load(loop2)
 
@@ -609,6 +626,9 @@ def main():
                 compteur_shot += 1
                 if compteur_shot == 30:
                     has_shot = False
+            if charging and compteur_charge <= 450:
+                compteur_charge +=1.5
+
 
             if has_dashed:
                 if compteur_dash > 7:
@@ -647,6 +667,7 @@ def main():
                 pygame.draw.rect(fenetre, BRASS, (45,110,compteur_shot,15))  # bullet
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
                 pygame.draw.rect(fenetre, SALMON, (100,550,boss.health,40))
+                pygame.draw.rect(fenetre, DARK_RED, (rect_x-7, rect_y-7,compteur_charge/20, 5 ))
                 if nb_phase !=3:
                     if current_pattern == "NO PATTERN":
                         print("Y'a pas de pattern là, on choisit")
@@ -816,6 +837,8 @@ def main():
                         projectile.remove(obj)
                     elif 20<obj.pos.x<780 and 20<obj.pos.y<580:
                         if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
+                            boss.health -= obj.damage
+                            score_attaques_boss += 100
                             projectile.remove(obj)
 
                 if 0<rect_x+5<800 and 0<rect_y+5<600:
@@ -826,9 +849,7 @@ def main():
 
                 pygame.draw.rect(fenetre, BLUE, (rect_x, rect_y, 10, 10))
 
-                if check_surrounding_pixel_colors(fenetre,boss.pos.x,boss.pos.y,BLACK,50):
-                    boss.health -= 4
-                    score_attaques_boss += 100
+
 
                 if boss.health < 500:
                     nb_phase = 2
@@ -848,7 +869,6 @@ def main():
                     print("\a")
                 sleep(0.5)
                 game_running = False  # exit game loop → back to character selection
-
             pygame.display.flip()
             clock.tick(60)
 
