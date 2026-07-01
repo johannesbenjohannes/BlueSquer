@@ -1,10 +1,12 @@
 import pygame
+from pygame import Rect
 import sys
 import os
 import math as m
 import random as rd
 from pyvectors import Vector2
-from time import sleep
+from time import sleep, time
+from color_palette import *
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -16,6 +18,8 @@ loop1 = "loop1.wav"
 loop2 = "loop2.wav"
 transition = "transition.wav"
 pygame.mixer.music.load(loop1)
+
+
 def check_surrounding_pixel_colors(surface,x,y,target,n):
     for i in range(int(x),int(x+n)):
         for j in range(int(y),int(y+n)):
@@ -25,21 +29,158 @@ def check_surrounding_pixel_colors(surface,x,y,target,n):
 
 
 
-def main():
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
-    LIGHT_BLUE = (0,160,255)
-    BRASS = (255, 159, 41)
-    LIGHT_BRASS = (255, 200, 91)
-    SALMON = (255, 99, 85)
-    DARK_SALMON = (200, 60, 85)
-    BORDEAUX = (159, 7, 18)
-    GRAY = (128,128,128)
+class Bullet:
+    pos: Vector2
+    velocity: float
+    target: Vector2
+    nature: str
+
+    def __init__(self, pos, target, nature, velocity=6) :
+        self.pos = pos
+        self.target = target
+        self.nature = nature
+        self.velocity = velocity
+
+class Ennemy:
+    pos: Vector2
+    width: int
+    height: int
+    health: float
+    rect: Rect
+
+    def __init__(self, pos, w, h, health):
+        self.pos = pos
+        self.width = w
+        self.height = h
+        self.health = health
+        self.updateRect()
     
-    speed = 3
+    def updateRect(self):
+        self.rect = Rect(*self.pos.components, self.width, self.height)
+
+    def draw(self, window):
+        self.updateRect()
+        pygame.draw.rect(window, (159, 7, 18), self.rect)
+
+class CircleAttack:
+    circles=[]
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.t = 0
+        self.r = 0
+        self.color = GREEN
+
+    def draw(self, window):
+        pygame.draw.circle(window, self.color, (self.x, self.y), self.r)
+
+    def update(self):
+        self.r += 0.4
+        self.t += 1
+        if self.t == 28:
+            self.color = RED
+        if self.r >= 12:
+            if self in CircleAttack.circles:
+                CircleAttack.circles.remove(self)
+
+class LineAttack:
+    lines=[]
+    def __init__(self,ax,ay,ex,ey):
+        self.ax = ax
+        self.ay = ay
+        self.ex = ex
+        self.ey = ey
+        self.t = 0
+        self.w = 0
+        self.color = GREEN
+
+    def draw(self, window):
+        pygame.draw.line(window, self.color, (self.ax, self.ay),(self.ex,self.ey), int(self.w))
+
+    def update(self):
+        self.w += 0.4
+        self.t += 1
+        if self.t == 28:
+            self.color = RED
+        if self.w >= 12:
+            if self in LineAttack.lines:
+                LineAttack.lines.remove(self)
+
+class Upgrade:
+    timer: int
+    toggled = True
+
+    class upgrade1:
+        key=pygame.K_b
+        
+        def __init__(self,timer):
+            self.timer=timer
+
+        def update(self):
+            if self.toggled:
+                self.timer+=1
+                if self.timer > 150:
+                    self.toggled=False
+
+
+class Ability():
+    plr: dict
+    timer = 0
+    enabled = True
+    active = False
+    cooldown = None
+    activation_timestamp = 0.0
+
+
+class Dash(Ability):
+    def __init__(self, plr):
+        self.plr = plr
+        self.cooldown = 1.2
+        self.activation_timestamp = time() - self.cooldown
+
+    def activate(self, /):
+        if not self.canActivate():
+            return
+        
+        self.timer = 0
+        self.active = True
+
+    def canActivate(self):
+        if not self.enabled or self.active:
+            return False
+        
+        if not self.cooldown: 
+            return True
+
+        return time() - self.activation_timestamp > cooldown
+
+    def udpate(self):
+        if not self.active: return
+
+        self.timer += 1
+
+        if self.timer <= 7:
+            self.plr["immortal"] = True
+            self.plr["speed"] = 13
+
+        else:
+            self.plr["immortal"] = False
+            self.plr["speed"] = 3
+
+
+def main():
+    player = {
+        "speed": 3,
+        "immortal": False,
+
+        "default_values": {
+            "speed": 3,
+            "immortal": False
+        }
+    }
+    dash_abil = Dash(player)
+    
+    player_speed = 3
     
 
     LARGEUR = 800
@@ -119,81 +260,6 @@ def main():
 
     mouse_x = 0
     mouse_y = 0
-
-
-
-    class Bullet:
-        def __init__(self, pos, target, nature, velocity=6) :
-            self.pos = pos
-            self.target = target
-            self.velocity = velocity
-            self.nature = nature
-
-    class Ennemy:
-        def __init__(self,pos,w,h,health):
-            self.pos = pos
-            self.w = w
-            self.h = h
-            self.health = health
-        
-        def draw(self):
-            pygame.draw.rect(fenetre, BORDEAUX, (self.pos.x, self.pos.y, self.w, self.h))
-
-    class CircleAttack:
-        circles=[]
-        def __init__(self,x,y):
-            self.x = x
-            self.y = y
-            self.t = 0
-            self.r = 0
-            self.color = GREEN
-
-        def draw(self):
-            pygame.draw.circle(fenetre, self.color, (self.x, self.y), self.r)
-
-        def update(self):
-            self.r += 0.4
-            self.t += 1
-            if self.t == 28:
-                self.color = RED
-            if self.r >= 12:
-                if self in CircleAttack.circles:
-                    CircleAttack.circles.remove(self)
-
-    class LineAttack:
-        lines=[]
-        def __init__(self,ax,ay,ex,ey):
-            self.ax = ax
-            self.ay = ay
-            self.ex = ex
-            self.ey = ey
-            self.t = 0
-            self.w = 0
-            self.color = GREEN
-
-        def draw(self):
-            pygame.draw.line(fenetre, self.color, (self.ax, self.ay),(self.ex,self.ey), int(self.w))
-
-        def update(self):
-            self.w += 0.4
-            self.t += 1
-            if self.t == 28:
-                self.color = RED
-            if self.w >= 12:
-                if self in LineAttack.lines:
-                    LineAttack.lines.remove(self)
-
-    class Upgrade:
-        class upgrade1:
-            key=pygame.K_b
-            def __init__(self,timer):
-                self.timer=timer
-                self.toggled=True
-            def update(self):
-                if self.toggled:
-                    self.timer+=1
-                    if self.timer > 150:
-                        self.toggled=False
 
 
     fenetre = pygame.display.set_mode((LARGEUR, HAUTEUR))
@@ -434,6 +500,7 @@ def main():
                     if btn_rect.collidepoint(event.pos) and selected_upd != 0:
                         nb_upgrade = selected_upd
                         in_upd = False
+            
             draw_upgrade_menu(menu_offset, selected_upd)
             menu_offset = (menu_offset + 1) % 40
             pygame.display.flip()
@@ -471,7 +538,7 @@ def main():
         compteur_dash = 120
         has_shot = False
         compteur_shot = 30
-        speed = 3
+        player["speed"] = 3
         boss = Ennemy(Vector2(400,300),50,50,600)
 
         # --- 3. Boucle principale ---
@@ -499,32 +566,33 @@ def main():
 
             touches = pygame.key.get_pressed()
             if touches[pygame.K_q] and touches[pygame.K_s] and rect_x > 0 and rect_y < 590:
-                rect_x -= speed*0.6
-                rect_y += speed*0.6
+                rect_x -= player["speed"]*0.6
+                rect_y += player["speed"]*0.6
             elif touches[pygame.K_q] and touches[pygame.K_z] and rect_x > 0 and rect_y > 0:
-                rect_x -= speed*0.6
-                rect_y -= speed*0.6
+                rect_x -= player["speed"]*0.6
+                rect_y -= player["speed"]*0.6
             elif touches[pygame.K_d] and touches[pygame.K_z] and rect_x < 785 and rect_y > 0:
-                rect_x += speed*0.6
-                rect_y -= speed*0.6
+                rect_x += player["speed"]*0.6
+                rect_y -= player["speed"]*0.6
             elif touches[pygame.K_d] and touches[pygame.K_s] and rect_x < 785 and rect_y < 590:
-                rect_x += speed*0.6
-                rect_y += speed*0.6
+                rect_x += player["speed"]*0.6
+                rect_y += player["speed"]*0.6
             elif touches[pygame.K_q] and rect_x > 0:
-                rect_x -= speed
+                rect_x -= player["speed"]
             elif touches[pygame.K_d] and rect_x < 785:
-                rect_x += speed
+                rect_x += player["speed"]
             elif touches[pygame.K_s] and rect_y < 590:
-                rect_y += speed
+                rect_y += player["speed"]
             elif touches[pygame.K_z] and rect_y > 0:
-                rect_y -= speed
+                rect_y -= player["speed"]
 
             if touches[pygame.K_SPACE]:
-                if compteur_dash == 120:
-                    has_dashed = True
-                    compteur_dash = 0
-                    speed = 13
-                    immortel = True
+                dash_abil.activate()
+                # if compteur_dash == 120:
+                #     has_dashed = True
+                #     compteur_dash = 0
+                #     player["speed"] = 13
+                #     immortel = True
             if touches[Upgrade.upgrade1.key] and nb_upgrade == 1:    #triggers boss blindness
                 toggled_upgrade = Upgrade.upgrade1(timer=compteur)
                 player_color = (204, 202, 232)
@@ -544,7 +612,7 @@ def main():
 
             if has_dashed:
                 if compteur_dash > 7:
-                    speed = 3
+                    player["speed"] = 3
                     immortel = False
             if has_dashed == True:
                 if compteur_dash == 120:
@@ -554,7 +622,7 @@ def main():
 
             fenetre.fill(WHITE)
 
-            boss.draw()
+            boss.draw(fenetre)
 
             if alive:
                   #section musique
@@ -658,7 +726,7 @@ def main():
                         patterns["line"]["attacking"] = True
                     for line in LineAttack.lines:
                         line.update()
-                        line.draw()
+                        line.draw(fenetre)
                     if patterns["line"]["attaques"] >= patterns["line"]["attaques_max"]:
                         draw_what = "NO PATTERN"
                         patterns["line"]["attacking"] = False
@@ -671,7 +739,7 @@ def main():
                         patterns["circle"]["attaques"] += 1
                     for circle in CircleAttack.circles:
                         circle.update()
-                        circle.draw()
+                        circle.draw(fenetre)
                     if patterns["circle"]["attaques"] >= patterns["circle"]["attaques_max"]:
                         draw_what = "NO PATTERN"
                         patterns["circle"]["attacking"] = False
@@ -720,7 +788,7 @@ def main():
                         patterns["line2"]["attacking"] = True
                     for line in LineAttack.lines:
                         line.update()
-                        line.draw()
+                        line.draw(fenetre)
                     if patterns["line2"]["attaques"] >= patterns["line2"]["attaques_max"]:
                         draw_what = "NO PATTERN"
                         patterns["line2"]["attacking"] = False

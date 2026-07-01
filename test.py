@@ -13,11 +13,15 @@ pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
 
 def check_surrounding_pixel_colors(surface,x,y,target,n):
-    for i in range(int(x),int(x+n)):
-        for j in range(int(y),int(y+n)):
+    for px in range(int(x),int(x+n)):
+        for py in range(int(y),int(y+n)):
             if surface.get_at((int(i), int(j))) == target:
                 return True
     return False
+
+bosses = {
+    1: {}
+}
 
 
 
@@ -34,11 +38,12 @@ def main():
     DARK_SALMON = (200, 60, 85)
     BORDEAUX = (159, 7, 18)
     GRAY = (128, 128, 128)
+    
+    
     speed = 3
     
 
     LARGEUR = 800
-
     HAUTEUR = 600
     
     rect_x = 10

@@ -1,0 +1,14 @@
+import pygame
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+LIGHT_BLUE = (0,160,255)
+BRASS = (255, 159, 41)
+LIGHT_BRASS = (255, 200, 91)
+SALMON = (255, 99, 85)
+DARK_SALMON = (200, 60, 85)
+BORDEAUX = (159, 7, 18)
+GRAY = (128,128,128)
