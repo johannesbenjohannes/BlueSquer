@@ -442,6 +442,7 @@ def main():
             clock.tick(60)
 
         # --- Reset game state before each run ---
+        pygame.mixer.music.load(loop1)
         rect_x = 10
         rect_y = 10
         past_rect_x = 0
@@ -455,6 +456,7 @@ def main():
         player_color=BLUE
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
+        phase_when_started = 0
         draw_what = "NO PATTERN"
         music_change = False
         first_move = True
@@ -468,7 +470,7 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
-        immortel = True  #fix
+        immortel = False  
         has_dashed = False
         compteur_dash = 120
         has_shot = False
@@ -673,6 +675,7 @@ def main():
                     compteur_dash += 1
 
                 if draw_what == "line":
+                    phase_when_started = nb_phase
                     if compteur % 60 == 0:
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
@@ -685,8 +688,13 @@ def main():
                         draw_what = "NO PATTERN"
                         patterns["line"]["attacking"] = False
                         patterns["line"]["compteur_attaque"] = 0
+                    if phase_when_started != nb_phase:
+                        draw_what = "NO PATTERN"
+                        patterns["line"]["attacking"] = False
+                        patterns["line"]["compteur_attaque"] = 0
 
                 if draw_what == "circle":
+                    phase_when_started = nb_phase
                     if compteur % 10 == 0:
                         CircleAttack.circles.append(CircleAttack(rect_x+5+player_direction.x*(-2.6), rect_y+5+player_direction.y*(-2.6)))
                         patterns["circle"]["attacking"] = True
@@ -699,7 +707,12 @@ def main():
                         patterns["circle"]["attacking"] = False
                         patterns["circle"]["compteur_attaque"] = 0
                         CircleAttack.circles.clear()
-
+                    if phase_when_started != nb_phase:
+                        draw_what = "NO PATTERN"
+                        patterns["circle"]["attacking"] = False
+                        patterns["circle"]["compteur_attaque"] = 0
+                        CircleAttack.circles.clear()
+                        
                 if draw_what == "bullets":
                     patterns["bullets"]["attacking"] = True
                     attaques = patterns["bullets"]["attaques"]
@@ -733,6 +746,7 @@ def main():
                                 obj.velocity = -4
 
                 if draw_what == "line2":
+                    phase_when_started = nb_phase
                     if compteur % 40 == 0:
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
@@ -744,6 +758,10 @@ def main():
                         line.update()
                         line.draw()
                     if patterns["line2"]["attaques"] >= patterns["line2"]["attaques_max"]:
+                        draw_what = "NO PATTERN"
+                        patterns["line2"]["attacking"] = False
+                        patterns["line2"]["compteur_attaque"] = 0
+                    if phase_when_started != nb_phase:
                         draw_what = "NO PATTERN"
                         patterns["line2"]["attacking"] = False
                         patterns["line2"]["compteur_attaque"] = 0
