@@ -6,7 +6,7 @@ from data import GAME_DATA
 from pyvectors import Vector2
 from pygame_ui import UILayer
 from time import time
-from color_palette import *
+from graphics.color_palette import *
 pygame.init()
 
 

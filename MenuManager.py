@@ -1,4 +1,4 @@
-import pygame, pygame_ui, json
+import pygame, pygame_ui as pygame_ui, json
 from pygame_ui import Panel
 from copy import deepcopy as clone
 

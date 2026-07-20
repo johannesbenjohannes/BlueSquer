@@ -6,7 +6,7 @@ import math as m
 import random as rd
 from pyvectors import Vector2
 from time import sleep, time
-from color_palette import *
+from graphics.color_palette import *
 import UI
 
 # --- 1. Initialisation ---
