@@ -6,7 +6,7 @@ import math as m
 import random as rd
 from pyvectors import Vector2
 from time import sleep, time
-from color_palette import *
+from graphics.color_palette import *
 
 # --- 1. Initialisation ---
 pygame.init()
@@ -105,6 +105,27 @@ class LineAttack:
         if self.w >= 12:
             if self in LineAttack.lines:
                 LineAttack.lines.remove(self)
+class surroundAttack:
+    surrounds = []
+    def __init__(self,x,y,theta,r):
+        self.x =x
+        self.y = y
+        self.theta = theta
+        self.r = r
+    def draw(self, window):
+        pygame.draw.circle(window, RED,(self.x,self.y),self.r,5)
+        pygame.draw.circle(window, WHITE,(self.x+(self.r-round(45*self.r/100))*m.cos(self.theta),self.y+(self.r-round(45*self.r/100))*m.sin(self.theta)),round(50*self.r/100),round(50*self.r/100))
+        pygame.draw.circle(window, WHITE,(self.x+(self.r-round(45*self.r/100))*m.cos(self.theta)*(-1),self.y+(self.r-round(45*self.r/100))*m.sin(self.theta)*(-1)),round(50*self.r/100),round(50*self.r/100))
+
+    def update(self):
+        self.r-=0.1
+        self.theta+=0.05
+        if self.r < 70:
+            self.r-=2
+            if self.r <30:
+                if self in surroundAttack.surrounds:
+                    surroundAttack.surrounds.remove(self)
+        
 
 class Upgrade:
     timer: int
@@ -132,40 +153,40 @@ class Ability():
     activation_timestamp = 0.0
 
 
-class Dash(Ability):
-    def __init__(self, plr):
-        self.plr = plr
-        self.cooldown = 1.2
-        self.activation_timestamp = time() - self.cooldown
+# class Dash(Ability):
+#     def __init__(self, plr):
+#         self.plr = plr
+#         self.cooldown = 1.2
+#         self.activation_timestamp = time() - self.cooldown
 
-    def activate(self, /):
-        if not self.canActivate():
-            return
+#     def activate(self, /):
+#         if not self.canActivate():
+#             return
         
-        self.timer = 0
-        self.active = True
+#         self.timer = 0
+#         self.active = True
 
-    def canActivate(self):
-        if not self.enabled or self.active:
-            return False
+#     def canActivate(self):
+#         if not self.enabled or self.active:
+#             return False
         
-        if not self.cooldown: 
-            return True
+#         if not self.cooldown: 
+#             return True
 
-        return time() - self.activation_timestamp > cooldown
+#         return time() - self.activation_timestamp > cooldown
 
-    def udpate(self):
-        if not self.active: return
+#     def udpate(self):
+#         if not self.active: return
 
-        self.timer += 1
+#         self.timer += 1
 
-        if self.timer <= 7:
-            self.plr["immortal"] = True
-            self.plr["speed"] = 13
+#         if self.timer <= 7:
+#             self.plr["immortal"] = True
+#             self.plr["speed"] = 13
 
-        else:
-            self.plr["immortal"] = False
-            self.plr["speed"] = 3
+#         else:
+#             self.plr["immortal"] = False
+#             self.plr["speed"] = 3
 
 
 def main():
@@ -178,7 +199,7 @@ def main():
             "immortal": False
         }
     }
-    dash_abil = Dash(player)
+    # dash_abil = Dash(player)
     DARK_RED = (200,0,0)
     
     player_speed = 3
@@ -237,7 +258,7 @@ def main():
             "attacking": False,
             "compteur_attaque": 0,
             "attaques": 0,
-            "attaques_max": 20,
+            "attaques_max": 15,
         },
         "bullets2":{
             "attacking": False,
@@ -246,10 +267,17 @@ def main():
             "attaques_max": 24,
             "compteur_attaque":0
         },
+        "surround":{
+            "attacking": False,
+            "compteur_attaque": 0,
+            "attaques": 0,
+            "attaques_max":5
+
+        }
     }
 
     phase_1 = ["circle", "bullets","line"]
-    phase_2 = ["line2", "bullets2"]
+    phase_2 = ["surround","line2","bullets2"]
     alive = True
     immortel = False
     toggled_upgrade = False
@@ -518,7 +546,7 @@ def main():
         boss_target_pos = Vector2(1,1)
         player_direction = Vector2(1,1)
         compteur = 0
-        nb_phase = 1
+        nb_phase = 2
         player_color=BLUE
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
@@ -536,7 +564,7 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
-        immortel = False  
+        immortel = True  
         has_dashed = False
         compteur_dash = 120
         has_shot = False
@@ -606,15 +634,15 @@ def main():
                 rect_y -= player["speed"]
 
             if touches[pygame.K_SPACE]:
-                dash_abil.activate()
-                # if compteur_dash == 120:
-                #     has_dashed = True
-                #     compteur_dash = 0
-                #     player["speed"] = 13
-                #     immortel = True
-            if touches[Upgrade.upgrade1.key] and nb_upgrade == 1:    #triggers boss blindness
-                toggled_upgrade = Upgrade.upgrade1(timer=compteur)
-                player_color = (204, 202, 232)
+                # dash_abil.activate()
+                if compteur_dash == 120:
+                    has_dashed = True
+                    compteur_dash = 0
+                    player["speed"] = 13
+                    immortel = True
+            # if touches[Upgrade.upgrade1.key] and nb_upgrade == 1:    #triggers boss blindness
+            #     toggled_upgrade = Upgrade.upgrade1(timer=compteur)
+            #     player_color = (204, 202, 232)
 
             for obj in projectile:
                 obj.pos += obj.target * obj.velocity
@@ -682,8 +710,11 @@ def main():
                             previous_pattern = current_pattern
                         elif nb_phase == 2:
                             current_pattern = rd.choice(phase_2)
+                            while current_pattern == previous_pattern:
+                                current_pattern = rd.choice(phase_2)
                             print(current_pattern)
                             patterns[current_pattern]["attaques"] = 0
+                            previous_pattern = current_pattern
                             if first_move:
                                 boss_target_x = rd.randint(100,700)
                                 boss_target_y = rd.randint(100,500)
@@ -724,7 +755,7 @@ def main():
                         CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
                     for circle in CircleAttack.circles:
                         circle.update()
-                        circle.draw()
+                        circle.draw(fenetre)
                     distance = (dx**2 + dy**2) ** 0.5
                     if distance < 2:
                         boss.pos.x = boss_target_pos.x
@@ -819,7 +850,7 @@ def main():
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
                         rdTheta = rd.uniform(0, 2*m.pi)
                         LineAttack.lines.append(LineAttack(rect_x+2000*m.cos(rdTheta),rect_y+2000*m.sin(rdTheta),rect_x+2000*m.cos(rdTheta+m.pi),rect_y+2000*m.sin(rdTheta+m.pi)))
-                        patterns["line"]["attaques"] += 1
+                        patterns["line2"]["attaques"] += 1
                         patterns["line2"]["attacking"] = True
                     for line in LineAttack.lines:
                         line.update()
@@ -832,6 +863,25 @@ def main():
                         draw_what = "NO PATTERN"
                         patterns["line2"]["attacking"] = False
                         patterns["line2"]["compteur_attaque"] = 0
+                
+                if draw_what == "surround":
+                    phase_when_started = nb_phase
+                    if compteur % 120 ==0:
+                        surroundAttack.surrounds.append(surroundAttack(rect_x,rect_y,rd.randint(1,89),100))
+                        patterns["surround"]["attaques"] += 1
+                        patterns["surround"]["attacking"] = True
+                    for surround in surroundAttack.surrounds:
+                        surround.update()
+                        surround.draw(fenetre)
+                    if patterns["surround"]["attaques"] >= patterns["surround"]["attaques_max"]:
+                        draw_what = "NO PATTERN"
+                        patterns["surround"]["attacking"] = False
+                        patterns["surround"]["compteur_attaque"] = 0
+                    if phase_when_started != nb_phase:
+                        draw_what = "NO PATTERN"
+                        patterns["surround"]["attacking"] = False
+                        patterns["surround"]["compteur_attaque"] = 0
+
 
                 if boss.health <= 0:
                     print("\a")
@@ -871,7 +921,7 @@ def main():
 
                 if boss.health < 500:
                     nb_phase = 2
-                if boss.health < 300:
+                if boss.health < 200:
                     nb_phase = 3
                     boss_target_x = 400
                     boss_target_y = 300
