@@ -8,6 +8,7 @@ from pyvectors import Vector2
 from time import sleep, time
 from graphics.color_palette import *
 
+
 # --- 1. Initialisation ---
 pygame.init()
 clock = pygame.time.Clock()
@@ -34,12 +35,14 @@ class Bullet:
     velocity: float
     target: Vector2
     nature: str
+    damage: int
 
-    def __init__(self, pos, target, nature, velocity=6) :
+    def __init__(self, pos, target, nature, velocity=6, damage =4) :
         self.pos = pos
         self.target = target
         self.nature = nature
         self.velocity = velocity
+        self.damage = damage
 
 class Ennemy:
     pos: Vector2
@@ -93,6 +96,7 @@ class LineAttack:
         self.t = 0
         self.w = 0
         self.color = GREEN
+
 
     def draw(self, window):
         pygame.draw.line(window, self.color, (self.ax, self.ay),(self.ex,self.ey), int(self.w))
@@ -546,7 +550,7 @@ def main():
         boss_target_pos = Vector2(1,1)
         player_direction = Vector2(1,1)
         compteur = 0
-        nb_phase = 2
+        nb_phase = 1
         player_color=BLUE
         current_pattern = "NO PATTERN"
         previous_pattern = "NO PATTERN"
@@ -564,7 +568,7 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
-        immortel = True  
+        immortel = False 
         has_dashed = False
         compteur_dash = 120
         has_shot = False
@@ -572,7 +576,12 @@ def main():
         charging = False
         compteur_shot = 30
         player["speed"] = 3
-        boss = Ennemy(Vector2(400,300),50,50,600)
+        boss = Ennemy(Vector2(375,275),50,50,600)
+        boss_shield = 0
+        is_shield = False
+        proj3_nb = 0
+        bullet3 = 0
+        pause_timer = 0
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -698,7 +707,7 @@ def main():
                 pygame.draw.rect(fenetre, DARK_SALMON, (105,555,boss.health,40))
                 pygame.draw.rect(fenetre, SALMON, (100,550,boss.health,40))
                 pygame.draw.rect(fenetre, DARK_RED, (rect_x-7, rect_y-7,compteur_charge/20, 5 ))
-                if nb_phase !=3:
+                if nb_phase <3:
                     if current_pattern == "NO PATTERN":
                         print("Y'a pas de pattern là, on choisit")
                         if nb_phase == 1:
@@ -737,7 +746,7 @@ def main():
 
                     if current_pattern != "NO PATTERN" and patterns[current_pattern]["attacking"] == True:
                         patterns[current_pattern]["compteur_attaque"] += 1
-                else:
+                if nb_phase == 4:
                     if compteur % (round(boss.health/10)+10) == 0:
                         for i in range(12):
                             CircleAttack.circles.append(CircleAttack(rd.randint(10,790), rd.randint(10,590)))
@@ -745,7 +754,7 @@ def main():
                         projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-100,100),boss.pos.y+25-rect_y+5+rd.randint(-100,100)).unit, RED,-4))
                     for circle in CircleAttack.circles:
                         circle.update()
-                        circle.draw()
+                        circle.draw(fenetre)
                 if nb_phase == 2:
                     dx = boss_target_pos.x - boss.pos.x
                     dy = boss_target_pos.y - boss.pos.y
@@ -768,7 +777,47 @@ def main():
                         uy = dy / distance
                         boss.pos.x += ux * 1
                         boss.pos.y += uy * 1
-
+                if nb_phase == 3:
+                    is_shield =True
+                    if boss_shield<150:
+                        if proj3_nb <150:
+                            if compteur % 5 ==0:
+                                side = rd.randint(1,4)
+                                b3_x=0
+                                b3_y=0
+                                if side==1:
+                                    proj3_nb+=1
+                                    b3_x=rd.randint(-94,-6)
+                                    b3_y=rd.randint(-94,694)
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                elif side == 2:
+                                    proj3_nb+=1
+                                    b3_x=rd.randint(-94,894)
+                                    b3_y=rd.randint(606,694)
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                elif side == 3:
+                                    proj3_nb+=1
+                                    b3_x=rd.randint(806,894)
+                                    b3_y=rd.randint(-94,694)
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                elif side ==4:
+                                    proj3_nb+=1
+                                    b3_x=rd.randint(-94,894)
+                                    b3_y=rd.randint(-94,-6)
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                    else:
+                        is_shield = False
+                        if bullet3<100:
+                            if compteur % 2 == 0:
+                                projectile.append(Bullet(Vector2(boss.pos.x+25, boss.pos.y+25),Vector2(rd.randrange(-11,11,2),rd.randrange(-11,11,2)).unit,RED,4))
+                                bullet3+=1
+                        else:
+                            if pause_timer <3:
+                                if compteur%60==0:
+                                    pause_timer+=1
+                            else:
+                                nb_phase = 4
+                
                 if has_dashed:
                     compteur_dash += 1
 
@@ -898,16 +947,25 @@ def main():
                         toggled_upgrade.update()
                     if toggled_upgrade.timer >= 150:
                         player_color=BLUE
+                if is_shield:
+                    pygame.draw.circle(fenetre, DARKER_RED,(400,300),100,10)
 
                 for obj in projectile:
                     pygame.draw.circle(fenetre, obj.nature,(obj.pos.components), 10,)
-                    if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-600) or obj.pos.y>700:
+                    if obj.pos.x<(-100) or obj.pos.x>900 or obj.pos.y<(-100) or obj.pos.y>700:
                         projectile.remove(obj)
                     elif 20<obj.pos.x<780 and 20<obj.pos.y<580:
-                        if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20) and obj.nature == BLACK:
-                            boss.health -= obj.damage
-                            score_attaques_boss += 100
+                        if obj.nature == BLACK and 0<obj.pos.x<800 and 0<obj.pos.y<600:
+                            if check_surrounding_pixel_colors(fenetre, obj.pos.x-10,obj.pos.y-10,BORDEAUX,20):
+                                boss.health -= obj.damage
+                                score_attaques_boss += 100
+                                projectile.remove(obj)
+                            if check_surrounding_pixel_colors(fenetre,obj.pos.x,obj.pos.y,DARKER_RED,10):
+                                projectile.remove(obj)
+                    if nb_phase == 3 and is_shield:
+                        if obj.pos.x<410 and obj.pos.x>390 and obj.nature == RED:
                             projectile.remove(obj)
+                            boss_shield +=1
 
                 if 0<rect_x+5<800 and 0<rect_y+5<600:
                     if check_surrounding_pixel_colors(fenetre,rect_x+5,rect_y+5,RED,10):
@@ -919,12 +977,13 @@ def main():
 
 
 
+
                 if boss.health < 500:
                     nb_phase = 2
                 if boss.health < 200:
                     nb_phase = 3
-                    boss_target_x = 400
-                    boss_target_y = 300
+                    boss_target_x = 375
+                    boss_target_y = 275
                     boss_target_pos = Vector2(boss_target_x, boss_target_y)
 
                 # text_score=base_font.render(f"Score: {round(compteur/3)+score_attaques_boss}", False, (0,0,0))
