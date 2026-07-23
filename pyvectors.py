@@ -1,9 +1,13 @@
 import math
 from types import GeneratorType
+from collections.abc import Iterable
 
 
 def isnumber(n) -> bool:
     return type(n) is int or type(n) is float
+
+def isindex(sequence, i):
+    return (len(sequence) != 0) and (type(i) is int) and (-len(sequence) <= i <= len(sequence)-1)
 
 class Vector():
     """ Vector object """
@@ -11,26 +15,34 @@ class Vector():
     components: tuple
     magnitude: float
 
-    def __init__(self, x=0, y=0, *components):
-        if type(x) is type(self):
-            return self.copy(x)
+    def __init__(self, c1=0, c2=0, *components):
+        if type(c1) is type(self):
+            return self.copy(c1)
 
         vec: tuple
-        if type(x) is GeneratorType or type(x) is list:
-            vec = tuple(x)
-        elif type(x) is tuple:
-            vec = x
+        if hasattr(c1, "__iter__"):
+            vec = tuple(c1)
         else:
-            vec = (x, y) + components
+            vec = (c1, c2) + components
         
         
         for comp in vec:
             if not isnumber(comp):
-                raise TypeError(f"invalid component type for 'Vector': {comp.__class__.__name__}, must be int / float")
+                raise TypeError(" ".join((f"invalid component type for 'Vector':",
+                    f"{comp.__class__.__name__}, must be int / float"))
+                    )
 
         self.components = vec
         self.magnitude = math.hypot(*vec)
 
+    def __iter__(self):
+        return iter(self.components)
+
+    def __getitem__(self, index):
+        if not isindex(self.components, index):
+            raise IndexError(f"{self.ExceptionPrint()}: {index}")
+
+        return self.components[index]
 
     # Comparisons
     def __eq__(self, other):
@@ -106,10 +118,18 @@ class Vector():
     def __truediv__(self, other):
         if isnumber(other):
             if other == 1: return self
+            if other == 0:
+                raise ZeroDivisionError(f"{self.ExceptionPrint()} division by zero")
+
             return type(self)(comp / other for comp in self.components)
 
-        elif not self.compatible(other):
+        if not self.compatible(other):
             self.RaiseOpException("/", other)
+        elif 0 in other.components:
+            raise ZeroDivisionError(" ".join((
+                f"{other.ExceptionPrint()}", 
+                "divisor contains a component equals to zero")
+            ))
         
         bComps = other.components
         return type(self)(comp / bComps[i] for i, comp in enumerate(self.components))
@@ -117,10 +137,18 @@ class Vector():
     # //
     def __floordiv__(self, other):
         if isnumber(other):
+            if other == 0:
+                raise ZeroDivisionError(f"{self.ExceptionPrint()} floor division by zero")
+
             return type(self)(comp // other for comp in self.components)
 
-        elif not self.compatible(other):
+        if not self.compatible(other):
             self.RaiseOpException("//", other)
+        elif 0 in other.components:
+            raise ZeroDivisionError(" ".join((
+                f"{other.ExceptionPrint()}", 
+                "divisor contains a component equals to zero")
+            ))
         
         bComps = other.components
         return type(self)(comp // bComps[i] for i, comp in enumerate(self.components))
@@ -238,10 +266,36 @@ class Vector():
     def lerp(self, other, t: float):
         return self + (other - self) * t
 
-    @property
     def unit(self):
         """ return self with a magnitude of 1 """
-        return self / self.magnitude
+        if self.magnitude == 0:
+            raise ArithmeticError(" ".join((
+                f"'null' {self.ExceptionPrint()}",
+                "has no unit vector equivalent")
+            ))
+
+        return self/self.magnitude
+
+    def vectorComponents(self):
+        vecs = []
+        vector = type(self)
+        length = len(self)
+
+        for i, comp in enumerate(self.components):
+            if comp == 0:
+                vecs.append(vector(*([0] * length)))
+                return
+            
+            # * unpack operator  ([0]* i)  list of zeros of lenght 'i'
+            vecs.append(
+                vector(
+                    *([0]* i), 
+                    comp, 
+                    *([0]* (length - 1 - i))
+                )
+            )
+
+        return vecs
 
 
 class Vector2(Vector):
@@ -255,10 +309,8 @@ class Vector2(Vector):
             return self.copy(x)
 
         vec: tuple
-        if type(x) is GeneratorType or type(x) is list:
+        if hasattr(x, "__iter__"):
             vec = tuple(x)
-        elif type(x) is tuple:
-            vec = x
         else:
             vec = (x, y)
 
@@ -267,7 +319,9 @@ class Vector2(Vector):
 
         for comp in vec:
             if not isnumber(comp):
-                raise TypeError(f"invalid component type for 'Vector2': {comp.__class__.__name__}, must be int / float")
+                raise TypeError(" ".join(("invalid component type for 'Vector2':",
+                    f"{comp.__class__.__name__}, must be int / float"))
+                    )
         
         self.x, self.y = vec
         self.components = vec
@@ -284,17 +338,38 @@ class Vector2(Vector):
         self.magnitude = other.magnitude
         self.components = other.components
 
-    @property
-    def vComponents(self) -> list:
-        return [
-            Vector2(self.x),
-            Vector2(0, self.y)
-        ]
+    def perpendicular(self, scale=1):
+        """
+            returns the equivalent vector rotated by 90 degrees
+            'scale' argument defines the direction of the rotation: 
+             - left  if 'scale' > 0
+             - right if 'scale' < 0
 
-    @property
-    def normal(self):
-        """ returns a perpendicular vector to self """
-        return Vector2(-self.y/self.magnitude, self.x/self.magnitude)
+            scale: perpendicular vector scale
+        """
+        return Vector2(
+            -self.y*scale,
+            self.x*scale
+        )
+    
+    def normal(self, scale=1):
+        """
+            returns normal vector
+            normal vector is a perpendicular vector of magnitude 1
+            'scale' argument defines the normal direction: 
+             - left  if 'scale' > 0
+             - right if 'scale' < 0
+
+            scale: perpendicular unit vector scale
+        """
+
+        if self.magnitude == 0:
+            raise ArithmeticError(f"'null' {self.ExceptionPrint()} has no normal vector")
+
+        return Vector2(
+            -self.y/self.magnitude*scale, 
+            self.x /self.magnitude*scale
+            )
 
 
 class Vector3(Vector):
@@ -309,10 +384,8 @@ class Vector3(Vector):
             self.copy(x)
 
         vec: tuple
-        if type(x) is GeneratorType or type(x) is list:
+        if hasattr(x, "__iter__"):
             vec = tuple(x)
-        elif type(x) is tuple:
-            vec = x
         else:
             vec = (x, y, z)
 
@@ -322,7 +395,9 @@ class Vector3(Vector):
         
         for comp in vec:
             if not isnumber(comp):
-                raise TypeError(f"invalid component type for 'Vector': {comp.__class__.__name__}, must be int / float")
+                raise TypeError(" ".join(("invalid component type for 'Vector3':",
+                    f"{comp.__class__.__name__}, must be int / float"))
+                    )
             
         
         self.x, self.y, self.z = vec
@@ -353,20 +428,12 @@ class Vector3(Vector):
             self.z*other.x - self.x*other.z, 
             self.x*other.y - self.y*other.x
         )
-    
-    @property
-    def vComponents(self) -> list:
-        return [
-            Vector3(self.x),
-            Vector3(0, self.y),
-            Vector3(0, 0, self.z)
-        ]
 
 
 def vsum(vectorList: [Vector]):
     total = None
     for vector in vectorList:
-        if total == None:
+        if total is None:
             total = vector
         else:
             total += vector
