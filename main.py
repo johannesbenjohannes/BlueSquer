@@ -1,5 +1,6 @@
 import pygame
-from pygame import Rect
+from pygame import Rect, Surface
+import pygame.mixer as pygmixer
 import sys
 import os
 import math as m
@@ -15,10 +16,12 @@ clock = pygame.time.Clock()
 pygame.font.init()
 base_font=pygame.font.SysFont('Comic Sans MS', 30)
 pygame.mixer.init()
-loop1 = "loop1.wav"
-loop2 = "loop2.wav"
-transition = "transition.wav"
-pygame.mixer.music.load(loop1)
+loop1 = "sounds\\music\\loop1.wav"
+loop2 = "sounds\\music\\loop2.wav"
+transition = "sounds\\sfx\\transition.wav"
+
+pygmixer.music.load(loop1)
+# pygmixer.music.
 
 
 def check_surrounding_pixel_colors(surface,x,y,target,n):
@@ -596,25 +599,25 @@ def main():
                     pygame.quit()
                     sys.exit()
                 if nb_upgrade ==2:
-                        if event.type ==pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
-                            charging = True
-                        if event.type == pygame.MOUSEBUTTONUP and charging == True:
-                            mouse_x = pygame.mouse.get_pos()[0]
-                            mouse_y = pygame.mouse.get_pos()[1]
-                            dx = mouse_x-rect_x
-                            dy = mouse_y - rect_y
-                            projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK, compteur_charge/10))
-                            has_shot = True
-                            charging = False 
-                            compteur_charge = 0
-                            compteur_shot = 0
+                    if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
+                        charging = True
+                    if event.type == pygame.MOUSEBUTTONUP and charging == True:
+                        mouse_x = pygame.mouse.get_pos()[0]
+                        mouse_y = pygame.mouse.get_pos()[1]
+                        dx = mouse_x-rect_x
+                        dy = mouse_y - rect_y
+                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit(), BLACK, compteur_charge/10))
+                        has_shot = True
+                        charging = False 
+                        compteur_charge = 0
+                        compteur_shot = 0
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
                         mouse_x = pygame.mouse.get_pos()[0]
                         mouse_y = pygame.mouse.get_pos()[1]
                         dx = mouse_x-rect_x
                         dy = mouse_y - rect_y
-                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit, BLACK))
+                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit(), BLACK))
                         has_shot = True
                         compteur_shot = 0
                 if event.type == 1:
@@ -687,7 +690,7 @@ def main():
                   #section musique
 
                 if pygame.mixer.music.get_busy()!= True:
-                    pygame.mixer.music.play()
+                    pygame.mixer.music.play(-1, 0, 100)
                 if nb_phase == 2:
                     if music_change!= True:
                         pygame.mixer.music.stop()
@@ -751,7 +754,7 @@ def main():
                         for i in range(12):
                             CircleAttack.circles.append(CircleAttack(rd.randint(10,790), rd.randint(10,590)))
                     if compteur % 6 == 0:
-                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-100,100),boss.pos.y+25-rect_y+5+rd.randint(-100,100)).unit, RED,-4))
+                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5+rd.randint(-100,100),boss.pos.y+25-rect_y+5+rd.randint(-100,100)).unit(), RED,-4))
                     for circle in CircleAttack.circles:
                         circle.update()
                         circle.draw(fenetre)
@@ -759,7 +762,7 @@ def main():
                     dx = boss_target_pos.x - boss.pos.x
                     dy = boss_target_pos.y - boss.pos.y
                     if compteur % 60 == 0:
-                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit, RED,-4))
+                        projectile.append(Bullet(Vector2(boss.pos.x+25,boss.pos.y+25), Vector2(boss.pos.x+25-rect_x+5,boss.pos.y+25-rect_y+5).unit(), RED,-4))
                     if compteur % 20 == 0:
                         CircleAttack.circles.append(CircleAttack(rect_x+5, rect_y+5))
                     for circle in CircleAttack.circles:
@@ -789,27 +792,27 @@ def main():
                                     proj3_nb+=1
                                     b3_x=rd.randint(-94,-6)
                                     b3_y=rd.randint(-94,694)
-                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit(),RED,-4))
                                 elif side == 2:
                                     proj3_nb+=1
                                     b3_x=rd.randint(-94,894)
                                     b3_y=rd.randint(606,694)
-                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit(),RED,-4))
                                 elif side == 3:
                                     proj3_nb+=1
                                     b3_x=rd.randint(806,894)
                                     b3_y=rd.randint(-94,694)
-                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit(),RED,-4))
                                 elif side ==4:
                                     proj3_nb+=1
                                     b3_x=rd.randint(-94,894)
                                     b3_y=rd.randint(-94,-6)
-                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit,RED,-4))
+                                    projectile.append(Bullet(Vector2(b3_x,b3_y),Vector2(b3_x-400,b3_y-300).unit(),RED,-4))
                     else:
                         is_shield = False
                         if bullet3<100:
                             if compteur % 2 == 0:
-                                projectile.append(Bullet(Vector2(boss.pos.x+25, boss.pos.y+25),Vector2(rd.randrange(-11,11,2),rd.randrange(-11,11,2)).unit,RED,4))
+                                projectile.append(Bullet(Vector2(boss.pos.x+25, boss.pos.y+25),Vector2(rd.randrange(-11,11,2),rd.randrange(-11,11,2)).unit(),RED,4))
                                 bullet3+=1
                         else:
                             if pause_timer <3:

@@ -1,6 +1,5 @@
 import math
 from types import GeneratorType
-from collections.abc import Iterable
 
 
 def isnumber(n) -> bool:
@@ -43,6 +42,9 @@ class Vector():
             raise IndexError(f"{self.ExceptionPrint()}: {index}")
 
         return self.components[index]
+
+    def __bool__(self):
+        return self.magnitude != 0
 
     # Comparisons
     def __eq__(self, other):

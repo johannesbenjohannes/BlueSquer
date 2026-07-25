@@ -148,7 +148,7 @@ def init(ui_layer, gameData):
         main_button = gui_descendants["main_button"]
 
         if main_button.state == "clicked":
-            load("Character", gameData)
+            gameData.gameplay_state = "Playing"
 
     charMenuPanel = Panel.fromLayer(ui_layer)
     charMenuPanel.build([

@@ -7,9 +7,6 @@ from time import time
 from math import floor, sin, cos
 from pyvectors import Vector2
 
-pygame.init()
-clock = pygame.time.Clock()
-
 def isSequence(v):
     return type(v) is list or type(v) is tuple
 
@@ -363,6 +360,9 @@ def exit():
 
 
 def demo():
+    pygame.init()
+    clock = pygame.time.Clock()
+
     ratio = 1200/1920
     WIDTH = 1000
     HEIGHT = WIDTH*ratio
