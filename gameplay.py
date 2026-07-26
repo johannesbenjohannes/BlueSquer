@@ -1,5 +1,6 @@
 import pygame, sys, os
-from pygame import Surface, Rect, Clock
+from pygame import Surface, Rect
+from pygame.time import Clock
 import pygame.display as pygdisplay
 from pyvectors import Vector2
 from time import time
@@ -25,6 +26,7 @@ class Ability():
 
     def activate(self, player):
         if not self.active and self.enabled:
+            print("activated")
             self.active = True
             self._onActivation(self, player)
 
@@ -34,8 +36,8 @@ class Ability():
         if self._onDeactivation:
             self._onDeactivation(self, player)
 
-    def update(self, player):
-        self._onUpdate(self, player)
+    def update(self, player, deltaTime):
+        self._onUpdate(self, player, deltaTime)
 
     def getData(self, name):
         return self.data[name]
@@ -111,6 +113,7 @@ class CharacterController():
         
         return window.blit(self.sprite, drawPos.components)
 
+
 class PlayerController(CharacterController):
     username = "Player"
 
@@ -143,24 +146,29 @@ def main():
     lastTick = time()
     startTick = lastTick
 
-    def dashUpdate(self: Ability, player: PlayerController):
-        self.data.set("tick", self.tick + 1)
-        
-        if self.data.tick >= 15:
+    def dashUpdate(self: Ability, player: PlayerController, deltaTime):
+        self.data.set("elapsed", self.elapsed+deltaTime)
+
+        if self.elapsed >= self.cooldown:
+            self.data.set("dashing", False)
             self.deactivate(player)
-        elif self.tick >= 7:
+        elif self.elapsed >= self.dashLength:
             player.speed = player.charSpeed
         else:
             player.speed = self.dashSpeed
         
 
     def dashActivation(self: Ability, player):
-        print("activated dash")
-        self.data.set("tick", 0)
+        self.data.set("elapsed", 0)
+        self.data.set("dashing", True)
 
     dashAbil = Ability({
         "tick": 0,
-        "dashSpeed": 20
+        "dashSpeed": 13,
+        "dashLength": .2,
+        "dashCoolDown": 5,
+        "elapsed": 0,
+        "dashing": False
     },
         dashUpdate,
         dashActivation
@@ -209,7 +217,7 @@ def main():
 
         ## Update
         if dashAbil.active:
-            dashAbil.update(plr)
+            dashAbil.update(plr, deltaTime)
 
         plr.update(deltaTime)
         plr.draw(window)

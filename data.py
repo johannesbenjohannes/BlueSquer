@@ -266,6 +266,7 @@ class AlteredDataTree(DataTree):
     pop = AlteredWrappedDict.pop
     clear = AlteredWrappedDict.clear
 
+
 def test():
     test = AlteredDataTree({
         "nice": True
