@@ -1,39 +1,56 @@
-import pygame
+import pygame, sys
 
 
 class WrappedDict():
-    """ dict wrapper where dict keys stored as strings can be directly indexed as object attribute """
-    _data = None
-    VERBOSE = True
+    """ dict wrapper 
+        Permits to query dict values stored with str keys by indexing 
+        as an object attribute
+        ex: self.key -> value is a shortcut for dataDictObject["key"] -> value
 
-    def __init__(self, d: dict=None):
-        self._data = d or {}
+        self.VERBOSE attribute precises if Warning are raised when
+        theres potentially missing data when que
+
+        Write data using the set() method or by indexing like a dict
+        ex: self.set(name, value) ; self[name] = value
+
+        get(); pop(); clear() methods act similar to the dict methods
+    """
+
+    __slots__= {'_data', 'VERBOSE'}
+
+    _data: dict
+    VERBOSE: bool
+    def __init__(self, src: dict=None):
+        self._data = src or {}
+        self.VERBOSE = True
 
     def __iter__(self):
         return iter(self._data)
 
     def __getattr__(self, attr):
         value = self.get(attr)
-
+        
         if value is None and self.VERBOSE:
-            raise Warning(" ".join((f"missing dict entry {attr},", 
+            raise Warning(" ".join((f"potentially missing data entry '{attr}',", 
                 f"turn this warning off by setting {self.__class__.__name__}.VERBOSE to False")
             ))
 
         return value
     
-    def setd(self, key, value):
-        """ set data: shortcut for WrappedDict._data['key'] = 'value' """
+    def set(self, key, value):
+        """ Write data """
         self._data[key] = value
 
     def __str__(self):
-        return str(self._data)
+        return f"<{self.__class__.__name__}>"
+    __repr__=__str__
 
     __getitem__ = __getattr__
-    __setitem__ = setd
+    __setitem__ = set
 
 
     def get(self, key):
+        """ Read data """
         return self._data.get(key)
 
     def pop(self, key):
@@ -43,63 +60,18 @@ class WrappedDict():
         self._data.clear()
 
 
-class DataTree(WrappedDict):
-    """ dict wrapper 
-        inherit from WrappedDict, used to create a tree of data
-        every 
-        
-    """
+class AlteredWrappedDict():
+    __slots__ = {'_data', '_alteredData','name'}
 
-    name: str
-
-    def __init__(self, src: dict=None, name="anonymous", tree=True):
-        self._data = {}
-        self.name = name
-
-        if src is None: return
-        
-        for k, v in src.items():
-            self.setd(k, v, tree)
-
-    def __repr__(self):
-        return f"<'{self.name}' {self.__class__.__name__}>"
-
-    def setd(self, key, value, recursion=True):
-        """ 
-            set data: shortcut for DataTree._data['name'] = 'value'   
-            'recursion' indicates the descendant dict type, type(self) if set to true
-        """
-        if type(value) is dict and recursion:
-            recursion = recursion is True and type(self) or recursion
-            name = value.get("name")
-            
-            if name is None or type(name) is not str:
-                name = "anonymous"
-                
-            value = recursion(value, name=name)
-
-        self._data[key] = value
-    __setitem__ = setd
-
-
-class AlteredDataTree(DataTree):
-    """ dict wrapper
-        inherit from DataTree, adds an altered data layer
-        
-        when querying data altered data will be returned other raw data
-        alter data by using the alter() (and not ) methods
-        use the restore() methods to bring data back to raw value
-     """
     _alteredData: dict
 
-    def __init__(self, src: dict=None, name="anonymous", tree=True):
-        DataTree.__init__(self, src, name, tree)
-        setattr(self, "_alteredData", {})
-
+    def __init__(self, src: dict=None):
+        WrappedDict.__init__(self, src)
+        self._alteredData = {}
 
     ## Public API
     def merge(self) -> dict:
-        """ returns a dict of the merge of altered and row data """
+        """ Merge altered and raw data in a dict """
         mergedDict = self._data.copy()
         for name, value in self._alteredData.items():
             mergedDict[name] = value
@@ -108,12 +80,16 @@ class AlteredDataTree(DataTree):
 
     def restore(self, name: str=None, getAlteredClone=False):
         """
-            used to restore data to its raw value
-            when no data name is given the entire data is restore to raw
+            Restore altered data to its raw value.
+            If no 'name' parameter is precised the 
+            entire data tree is restored to raw data.
 
             returns the altered data value
 
-            getAlteredClone defines if a clone of the altered data dict is returned
+            'getAlteredClone' only affects when no 'name' param is precised.
+            when set to True a copy of the altered data is created and returned. 
+            Thus this methods returns None if no 'name' param is precised and 
+            'getAlteredClone' param is set to False.
         """
         if not name:
             alteredCopy = None
@@ -128,32 +104,43 @@ class AlteredDataTree(DataTree):
         return altered
 
     def alter(self, name, alteredValue):
-        """ alters data """
-        if self.getRaw(name) is None:
-            raise IndexError(f"cannot create altered data other missing {name} raw data")
+        """ Alter data """
+        if not (name in self._data):
+            raise IndexError(f"cannot write altered data over missing '{name}' raw data")
         
         self._alteredData[name] = alteredValue
-    # Setting data using index will create altered data
-    __setitem__=alter
-
-    def setd(self, name, value, recursion=DataTree):
-        """
-            set data: shortcut for AlteredDataTree._data['name'] = 'value'   
-            'recursion' indicates the descendant dict type, type(self) if set to true
-        """
-        DataTree.setd(self, name, value, recursion=recursion)
     
-    ## Dict methods
+    def stamp(self, name=None):
+        """ Write altered data into raw data.
+            If 'name' param is let to None the entire altered 
+            data layer will be written into the raw data. 
+        """
+        if name is None:
+            for k, v in self._alteredData.items():
+                self._alteredData.pop(name)
+                self._data[name] = altered
+        else:
+            if not (name in self._alteredData):
+                raise IndexError(f"cannot stamp missing '{name}' altered data into raw data")
+            
+            altered = self.getAltered(name)
+            self._alteredData.pop(name)
+            self._data[name] = altered
+    
+    ## Data methods
     def getRaw(self, key):
         return self._data.get(key)
+    
+    def getAltered(self, key):
+        return self._alteredData.get(key)
 
     def get(self, key):
-        altered = self._alteredData.get(key)
+        altered = self.getAltered(key)
         
         if altered is not None:
             return altered
         else:
-            return self._data.get(key)
+            return self.getRaw(key)
 
     def pop(self, key):
         altered = self._alteredData.get(key)
@@ -167,6 +154,177 @@ class AlteredDataTree(DataTree):
         self._data.clear()
         self._alteredData.clear()
 
+
+class DataTree(WrappedDict):
+    """ dict wrapper 
+        inherit from WrappedDict, Permits to query dict values stored 
+        with str keys by indexing as an object attribute.
+        ex: self.key -> value is a shortcut for dataDictObject["key"] -> value
+
+        Used to create advanced data trees, every data entry of type dict
+        is converted to another tree.
+        ex: self.tree1.tree2.key == dataDictObject["tree1"]["tree2"]["key"]
+
+        self.VERBOSE attribute precises if Warning are raised when
+        theres potentially missing data when que
+
+        Write data using the set() method or by indexing like a dict
+        ex: self.set(name, value) ; self[name] = value
+
+        get(); pop(); clear() methods act similar to the dict methods
+    """
+    __slots__ = {'_data', 'name', 'VERBOSE'}
+
+    name: str
+
+    def __init__(self, src: dict=None, name="anonymous", recursive=True):
+        self._data = {}
+        self.VERBOSE = True
+        self.name = name
+
+        if src is None: return
+        
+        for k, v in src.items():
+            self.set(k, v, recursive)
+
+    def __str__(self):
+        return f"<'{self.name}' {self.__class__.__name__}>"
+    __repr__=__str__
+
+    def set(self, key, value, recursive=True):
+        """ 
+            Write data
+            
+            'recursive' param indicates the descendant dict type.
+            type(self) is used if set to True
+        """
+        if type(value) is dict and recursive:
+            recursionType = recursive is True and type(self) or recursive
+            name = value.get("name")
+            
+            if type(name) is not str:
+                name = "anonymous"
+                
+            value = recursionType(value, name=name, recursive=recursive)
+            value.VERBOSE = self.VERBOSE
+
+        self._data[key] = value
+    __setitem__ = set
+
+
+class AlteredDataTree(DataTree):
+    """ dict wrapper 
+        inherit from both DataTree and AlteredWrappedDict, Permits to 
+        query dict values stored with str keys by indexing as object attribute.
+        ex: self.key -> value is a shortcut for dataDictObject["key"] -> value
+
+        Used to create advanced data trees that contains two layer of data: 
+        raw data and altered data.
+        When reading the altered data is red over the raw data.
+        Alter data by using the alter() method.
+        When writing data with set() method or by indexing it only affects raw data.
+        Use the restore() methods to revert altered data to raw data.
+
+        self.VERBOSE attribute precises if Warning are raised when
+        theres potentially missing data when que
+
+        Write data using the set() method or by indexing like a dict
+        ex: self.set(name, value) ; self[name] = value
+
+        get(); pop(); clear() methods act similar to the dict methods
+    """
+    __slots__ = {'_data', '_alteredData', 'name'}
+
+    _alteredData: dict
+
+    def __init__(self, src: dict=None, name="anonymous", recursive=DataTree):
+        DataTree.__init__(self, src, name, recursive)
+        self._alteredData = {}
+
+
+    ## Public API
+    merge = AlteredWrappedDict.merge
+    restore = AlteredWrappedDict.restore
+    alter = AlteredWrappedDict.alter
+    stamp = AlteredWrappedDict.stamp
+
+    def set(self, name, value, recursive=DataTree):
+        """
+            Writes raw data
+            
+            'recursive' param indicates the descendant dict type
+            type(self) is used if this param is set to true
+        """
+        DataTree.set(self, name, value, recursive=recursive)
+    __setitem__=set
+    
+    
+    ## Data methods
+    getAltered = AlteredWrappedDict.getAltered
+    getRaw = AlteredWrappedDict.getRaw
+    get = AlteredWrappedDict.get
+    pop = AlteredWrappedDict.pop
+    clear = AlteredWrappedDict.clear
+
+def test():
+    test = AlteredDataTree({
+        "nice": True
+    })
+
+    test.set("nice", False)
+    print("test.nice", test.nice)
+    print("test.getRaw('nice')", test.getRaw("nice"))
+
+    print(test._data, test._alteredData)
+
+    print()
+    test.alter("nice", True)
+    print("test.nice", test.nice)
+    print("test.getRaw('nice')", test.getRaw("nice"))
+
+    print(test._data, test._alteredData)
+
+    print()
+    test.restore()
+    print("test.nice", test.nice)
+    print("test.getRaw('nice')", test.getRaw("nice"))
+
+    print(test._data, test._alteredData)
+
+
+    print()
+    dih = {
+        "name": "SUPER",
+        "xd": True,
+        "recursive": {
+            "name": "RECURSIVE",
+            "damn": 1
+        }
+    }
+    test.set("superDict", dih, recursive=True)
+
+    print("test.superDict", test.superDict)
+    print(test._data, test._alteredData)
+
+    print()
+    print("test.superDict.recursive.damn", test.superDict.recursive.damn)
+
+    print()
+    test.superDict.recursive.alter('damn', 2)
+    print("test.superDict.recursive.damn", test.superDict.recursive.damn)
+    print("test.superDict.recursive.getRaw('damn')", test.superDict.recursive.getRaw('damn'))
+
+    print()
+    print("test.superDict.recursive", test.superDict.recursive)
+
+    print()
+    test.superDict.recursive.stamp('damn')
+    # print(test.damn)
+    print(test.superDict.recursive.getRaw("damn"))
+    print(test.superDict.recursive.getAltered("damn"))
+
+if __name__=="__main__":
+    test()
 
 GAME_DATA = DataTree({
     "game_state": "Menu",

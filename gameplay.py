@@ -4,7 +4,7 @@ import pygame.display as pygdisplay
 from pyvectors import Vector2
 from time import time
 from graphics.color_palette import *
-from data import DataTree
+from data import DataTree, AlteredDataTree
 
 
 class Ability():
@@ -15,46 +15,32 @@ class Ability():
     active = False
     enabled = True
 
-    data: dict
-    modifiedData: dict
+    data: AlteredDataTree
 
-    def __init__(self, data: dict, onUpdate, onActivation, onDeactivation):
-        self.data = data
-        self.modifiedData = {}
+    def __init__(self, data: dict, onUpdate, onActivation, onDeactivation=None):
+        self.data = AlteredDataTree(data)
+        self._onActivation = onActivation
+        self._onDeactivation = onDeactivation
+        self._onUpdate = onUpdate
 
-    def getData(self, name):
-        modified = self.modifiedData.get(name)
-        return modified or self.data[name]
-    __getattr__ = getData
-
-    def getBaseData(self, name):
-        return self.data[name]
-
-    def setData(self, name, value):
-        self.data[name] = value
-
-    def modifyData(self, name, value):
-        originalData = self.data[name]
-        if originalData == value:
-            return
-
-        self.modifiedData[name] = value
-        
-    def dataModified(self, name):
-        return self.modifiedData.get(name) is not None
-
-    def activate(self, player, gameData):
+    def activate(self, player):
         if not self.active and self.enabled:
             self.active = True
-            self._onActivation(self, player, gameData)
+            self._onActivation(self, player)
 
-    def deactivate(self, player, gameData):
+    def deactivate(self, player):
+        print("deactivated")
         self.active = False
         if self._onDeactivation:
-            self._onDeactivation(self, player, gameData)
+            self._onDeactivation(self, player)
 
-    def update(self, player, gameData):
-        self._onUpdate(self, player, gameData)
+    def update(self, player):
+        self._onUpdate(self, player)
+
+    def getData(self, name):
+        return self.data[name]
+
+    __getattr__=getData
 
 
 class CharacterController():
@@ -125,22 +111,20 @@ class CharacterController():
         
         return window.blit(self.sprite, drawPos.components)
 
-
 class PlayerController(CharacterController):
     username = "Player"
 
     abilites: list
-    data: DataTree
+    data: AlteredDataTree
 
-    
-
-    def __init__(self, sprite, data: DataTree=None):
+    def __init__(self, sprite, data: dict=None):
         CharacterController.__init__(self, sprite)
-        self.data = data or DataTree()
-        self.username = username
+        self.data = AlteredDataTree(data or {})
+        self.data.name = "PlayerData"
 
-    def __getattr__(self, attr):
-        return self.data[attr]
+    def getData(self, name):
+        return self.data[name]
+    __getattr__=getData
 
 
 def exit():
@@ -159,24 +143,39 @@ def main():
     lastTick = time()
     startTick = lastTick
 
-    def dashUpdate(self, player, gameData):
-        self.data["tick"] += 1
-        if 
+    def dashUpdate(self: Ability, player: PlayerController):
+        self.data.set("tick", self.tick + 1)
+        
+        if self.data.tick >= 15:
+            self.deactivate(player)
+        elif self.tick >= 7:
+            player.speed = player.charSpeed
+        else:
+            player.speed = self.dashSpeed
+        
 
-    def dashActivation(self, player, gameData):
-        pass
+    def dashActivation(self: Ability, player):
+        print("activated dash")
+        self.data.set("tick", 0)
 
     dashAbil = Ability({
-        "tick": 0
-    }, 
+        "tick": 0,
+        "dashSpeed": 20
+    },
         dashUpdate,
-
+        dashActivation
     )
 
     # plrSprite = pygame.image.load("sprites\\sprite.png")
-    plrSprite = Surface((100, 100))
-    playerController = CharacterController(pygame.transform.scale_by(plrSprite, .2))
-    playerController.position = windowSize/2
+    plrSprite = Surface((25, 25))
+    plr = PlayerController(
+        plrSprite,
+        {
+            "charSpeed": 5
+        }
+        )
+    plr.position = windowSize/2
+    plr.speed = plr.charSpeed
 
     while True:
         now = time()
@@ -194,29 +193,26 @@ def main():
                     exit()
 
         pressedKeys = pygame.key.get_pressed()
-        moving = False
-
-        playerController.stop()
+        plr.stop()
         
         if pressedKeys[pygame.K_z]:
-            playerController.step(Vector2(0, -1))
-            moving = True
+            plr.step(Vector2(0, -1))
         if pressedKeys[pygame.K_q]:
-            playerController.step(Vector2(-1))
-            moving = True
+            plr.step(Vector2(-1))
         if pressedKeys[pygame.K_d]:
-            playerController.step(Vector2(1))
-            moving = True
+            plr.step(Vector2(1))
         if pressedKeys[pygame.K_s]:
-            playerController.step(Vector2(0, 1))
-            moving = True
-        
-        if elapsed > 1:
-            playerController.damage(1)
+            plr.step(Vector2(0, 1))
+
+        if pressedKeys[pygame.K_SPACE]:
+            dashAbil.activate(plr)
 
         ## Update
-        playerController.update(deltaTime)
-        playerController.draw(window)
+        if dashAbil.active:
+            dashAbil.update(plr)
+
+        plr.update(deltaTime)
+        plr.draw(window)
 
         pygdisplay.flip()
         mainClock.tick(60)
