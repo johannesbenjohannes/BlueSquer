@@ -44,18 +44,63 @@ class Ability():
     __getattr__=getData
 
 
-class CharacterController():
-    sprite: Surface
+class Sprite():
+    image: Surface
+    anchorPoint: Vector2
+    size: Vector2
+
+    def __init__(self, sprite: Surface, spriteDownscale: int=1):
+        if spriteDownscale !=  1:
+            self.image = pygame.transform.scale_by(sprite, spriteDownscale)
+        else:
+            self.image = sprite
+        self.size = Vector2(self.image.get_size())
+        self.anchorPoint = Vector2(0.5, 0.5)
+
+    def draw(self, surface: Surface, at: Vector2):
+        imagePos = at - self.size * self.anchorPoint
+        surface.blit(self.image, imagePos.components)
+
+
+class GameObject():
+    name = "object"
+
+    sprite: Sprite
+
+    acceleration = Vector2()
+    velocity = Vector2()
+    position = Vector2()
+
+    def __init__(self, sprite: Sprite):
+        self.sprite = sprite
+
+    def update(self):
+        self.velocity += self.acceleration
+        self.position += self.velocity
+
+    def draw(self, surface):
+        self.sprite.draw(surface, self.position)
+
+
+class CharacterController(GameObject):
     speed = 3
     health = 100
     walkDirection = Vector2()
     
     state = "idle"
+    
+    walkDirection = Vector2()
 
-    position = Vector2()
+    def __init__(self, sprite: Sprite):
+        GameObject.__init__(self, sprite)
+        self.name = "character"
 
-    def __init__(self, sprite: Surface):
-        self.sprite = sprite
+    def getData(self, key):
+        return self.data[key]
+    __getattr__=getData
+
+    def setData(self, key, value):
+        self.data.set(key, value)
 
 
     ## Movement
@@ -99,40 +144,122 @@ class CharacterController():
             self.health = 0
 
     ## Update
-    def update(self, deltaTime):
+    def update(self):
         if self.state == "dead":
             return
 
         if self.state == "walking":
-            self.position += self.walkDirection*self.speed
+            self.velocity = self.walkDirection*self.speed
+            self.position += self.velocity
 
-    def draw(self, window: Surface):
-        spriteSize = Vector2(self.sprite.get_size())
-        drawPos = self.position - spriteSize/2
-        
-        return window.blit(self.sprite, drawPos.components)
 
-class PlayerController(CharacterController):
-    username = "Player"
-
-    abilites: list
+class Player():
+    character: CharacterController
     data: AlteredDataTree
 
-    def __init__(self, sprite, data: dict=None):
-        CharacterController.__init__(self, sprite)
-        self.data = AlteredDataTree(data or {})
-        self.data.name = "PlayerData"
+    def __init__(self, data: dict, sprite: Sprite):
+        self.data = AlteredDataTree(data, name="PlayerData")
+        self.character = CharacterController(sprite)
 
-    def getData(self, name):
-        return self.data[name]
+    def getData(self, key):
+        return self.data[key]   
     __getattr__=getData
 
+    def setData(self, key, value):
+        self.data[key] = value
+
+
+class GameLayer():
+    surface: Surface
+    gameObjects: [GameObject]
+    players: [Player]
+    
+    def __init__(self, window: Surface):
+        self.surface = Surface(window.get_size(), pygame.SRCALPHA)
+        self.gameObjects = []
+
+    
+    def addPlayer(self, plr: Player):
+        self.players.append(plr)
+        self.add(plr.character)
+
+    def removePlayer(self, plr: Player):
+        self.players.remove(plr)
+        self.remove(plr.character)
+
+    
+    def add(self, *objs: GameObject):
+        for obj in objs:
+            if not isinstance(obj, GameObject):
+                raise ValueError(f"{obj.__class__.__name__} cannot be simulated")
+
+            if obj in self.gameObjects:
+                raise ValueError(f"{obj.__class__.__name__} '{obj.name}' is already being simulated")
+            
+            self.gameObjects.append(obj)
+
+    def remove(self, *obj: GameObject):
+        for obj in objs:
+            if not obj in self.gameObjects:
+                raise ValueError(f"cannot remove missing {obj.__class__.__name__} '{obj.name}' from simulation")
+
+            self.gameObjects.remove(obj)
+
+    
+    def render(self):
+        self.surface.fill((0, 0, 0, 0))
+
+        for obj in self.gameObject:
+            obj.update()
+            obj.draw(self.surface)
+
+
+def getDash():
+    def dashUpdate(self: Ability, player: PlayerController, deltaTime):
+        if self.elapsed >= self.length:
+            self.deactivate(player)
+            self.data.set("dashing", False)
+            player.speed = player.charSpeed
+        else:
+            player.speed = self.speed
+            player.walkDirection = self.direction
+            player.state = "walking"
+        
+
+    def dashActivation(self: Ability, player):
+        self.setData("dashing", True)
+        self.setData("direction", player.walkDirection)
+
+    def dashPoll(self: Ability, player):
+        return player.state == "walking"
+
+    return Ability({
+        "speed": 13,
+        "length": .2,
+        "dashing": False,
+        "direction": Vector2(1)
+        },
+        dashUpdate,
+        dashActivation,
+        poll=dashPoll,
+        cooldown=2
+    )
 
 def exit():
     pygame.quit()
     sys.exit()
     return False
 
+
+# def draw_animated_bg(window):
+#     """ Shared animated dot-grid background. """
+#     offset = time() % 40
+#     spacing = 40
+#     for gx in range(-spacing, LARGEUR + spacing, spacing):
+#         for gy in range(-spacing, HAUTEUR + spacing, spacing):
+#             x = (gx - offset) % (LARGEUR + spacing)
+#             y = (gy + offset) % (HAUTEUR + spacing)
+#             pygame.draw.circle(window, (220, 220, 220), (x, y), 2)
 
 def main():
     pygame.init()
@@ -167,29 +294,45 @@ def main():
         dashActivation
     )
 
-    # plrSprite = pygame.image.load("sprites\\sprite.png")
-    plrSprite = Surface((25, 25))
-    plr = PlayerController(
-        plrSprite,
+    
+    game = GameLayer(window)
+
+    spritePNG = pygame.image.load("sprites\\lobsta.png")
+    plrSprite = Sprite(spritePNG, 70/800)
+    # plrSprite = Surface((25, 25))
+    plr = Player(
         {
-            "charSpeed": 5
-        }
-        )
-    plr.position = windowSize/2
-    plr.speed = plr.charSpeed
+            "charSpeed": 5,
+            "abilites": [],
+            "immortal": False,
+        },
+        plrSprite)
+    
+    # plr = CharacterController(
+    #     plrSprite,
+    #     {
+    #         "charSpeed": 5,
+    #         "abilites": [],
+    #         "immortal": False,
+    #     })
+    plr.character.position = windowSize/2
+    plr.character.speed = plr.charSpeed
+    plr.abilites.append(getDash())
+    plr.abilites.append(shieldAbil)
 
     while True:
         now = time()
         deltaTime = now - lastTick
         elapsed = now - startTick
         window.fill(WHITE)
+        # draw_animated_bg(window)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
             
             if event.type == pygame.KEYDOWN:
-                # przint(event.unicode , event.key)
+                # print(event.unicode , event.key)
                 if event.key == 27:
                     exit()
 
@@ -212,8 +355,12 @@ def main():
         if dashAbil.active:
             dashAbil.update(plr)
 
-        plr.update(deltaTime)
-        plr.draw(window)
+        # plr.update(deltaTime)
+        # plr.draw(window)
+
+        game.render()
+
+        window.blit(render.surface, (0, 0))
 
         pygdisplay.flip()
         mainClock.tick(60)

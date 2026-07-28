@@ -105,7 +105,7 @@ def refresh(gameData):
     assert active_menu, "cannot refresh, no menu is loaded"
     active_menu.load(gameData)
 
-    
+
 
 def init(ui_layer, gameData):
     mainMenuPanel = Panel.fromLayer(ui_layer)

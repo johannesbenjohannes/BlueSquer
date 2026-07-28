@@ -1,6 +1,7 @@
 import pygame
-from pygame import Color, Rect, Surface, Font
-# from pygame.font import Font
+from pygame import Rect, Surface
+from pygame.color import Color
+from pygame.font import Font
 
 import sys
 from time import time
@@ -138,8 +139,7 @@ class Frame(UIElement):
         surface.fill((0, 0, 0, 0))
 
         draw_rect = pygame.draw.rect(surface, self.color, rect)
-        layer.blit(surface)
-        
+        layer.blit(surface, (0, 0))
         return draw_rect
 
     def update(self, surface) -> Rect:
