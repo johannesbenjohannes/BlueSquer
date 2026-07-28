@@ -202,14 +202,14 @@ class GameLayer():
     
     def addPlayer(self, plr: Player):
         self.players.append(plr)
-        self.add(plr.character)
+        self.simulate(plr.character)
 
     def removePlayer(self, plr: Player):
         self.players.remove(plr)
         self.remove(plr.character)
 
     
-    def add(self, *objs: GameObject):
+    def simulate(self, *objs: GameObject):
         for obj in objs:
             if not isinstance(obj, GameObject):
                 raise ValueError(f"{obj.__class__.__name__} cannot be simulated")
