@@ -123,12 +123,12 @@ def main():
                 active_menu.exit()
                 active_menu = None
             
-            GAME_DATA.game_state = "Playing"
+            GAME_DATA.set("game_state", "Playing")
             playerController.update(deltaTime)
             playerController.draw(window)
 
         if active_menu is not None:
-            GAME_DATA.game_state = "Menu"
+            GAME_DATA.set("game_state", "Menu")
             GAME_DATA.gameplay_state = "Paused"
             active_menu.update(active_menu, GAME_DATA)
 

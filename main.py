@@ -688,9 +688,9 @@ def main():
 
             if alive:
                   #section musique
-
+                
                 if pygame.mixer.music.get_busy()!= True:
-                    pygame.mixer.music.play(-1, 0, 100)
+                    pygame.mixer.music.play()
                 if nb_phase == 2:
                     if music_change!= True:
                         pygame.mixer.music.stop()
