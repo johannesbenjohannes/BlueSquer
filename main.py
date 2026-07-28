@@ -100,7 +100,6 @@ class LineAttack:
         self.w = 0
         self.color = GREEN
 
-
     def draw(self, window):
         pygame.draw.line(window, self.color, (self.ax, self.ay),(self.ex,self.ey), int(self.w))
 
@@ -112,6 +111,20 @@ class LineAttack:
         if self.w >= 12:
             if self in LineAttack.lines:
                 LineAttack.lines.remove(self)
+class LobstaAttack:
+    claws=[]
+    def __init__(self,pos,dir,damage=10,spacing=0.5):
+        self.pos = pos
+        self.dir = dir
+        self.damage=damage
+        self.spacing =spacing
+    def update(self):
+        self.spacing-=0.05
+        if self.spacing <0.05:
+            LobstaAttack.claws.remove(self)
+    def draw(self, window):
+        pygame.draw.line(window, BLACK,(self.pos.x+10*m.cos(self.dir),self.pos.y+15*m.sin(self.dir)),(self.pos.x+50*m.cos(self.dir+self.spacing),self.pos.y+50*m.sin(self.dir+self.spacing)),5)
+        pygame.draw.line(window, BLACK,(self.pos.x+10*m.cos(self.dir),self.pos.y+15*m.sin(self.dir)),(self.pos.x+50*m.cos(self.dir-self.spacing),self.pos.y+50*m.sin(self.dir-self.spacing)),5)
 class surroundAttack:
     surrounds = []
     def __init__(self,x,y,theta,r):
@@ -320,6 +333,11 @@ def main():
         color = LIGHT_BLUE if selected else BLUE
         pygame.draw.rect(fenetre, color, (cx - 18, cy - 18, 36, 36), border_radius=4)
 
+    def get_squer_sprite():
+        sprite = Surface((10,10))
+        sprite.fill(BLUE)
+        return sprite
+    
     def draw_lobsta_preview(cx, cy, selected):
         color = LIGHT_BLUE if selected else BLUE
         pygame.draw.ellipse(fenetre, color, (cx - 12, cy - 22, 24, 38))   # body
@@ -328,6 +346,19 @@ def main():
         pygame.draw.line(fenetre, color, (cx - 6, cy - 22), (cx - 20, cy - 38), 2)  # antennae
         pygame.draw.line(fenetre, color, (cx + 6, cy - 22), (cx + 20, cy - 38), 2)
         pygame.draw.ellipse(fenetre, color, (cx - 8, cy + 16, 16, 10))    # tail
+
+    def get_lobsta_sprite():
+        cx = 35
+        cy=35
+        sprite = Surface((70,70),pygame.SRCALPHA)
+        sprite.set_alpha(255)
+        pygame.draw.ellipse(sprite, BLUE, (cx - 12, cy - 22, 24, 38))   # body 
+        pygame.draw.ellipse(sprite, BLUE, (cx - 30, cy - 10, 18, 12))   # left claw
+        pygame.draw.ellipse(sprite, BLUE, (cx + 12, cy - 10, 18, 12))   # right claw
+        pygame.draw.line(sprite, BLUE, (cx - 6, cy - 22), (cx - 20, cy - 38), 2)  # antennae
+        pygame.draw.line(sprite, BLUE, (cx + 6, cy - 22), (cx + 20, cy - 38), 2)
+        pygame.draw.ellipse(sprite, BLUE, (cx - 8, cy + 16, 16, 10))    # tail
+        return sprite
 
     def draw_animated_bg(offset):
         """Shared animated dot-grid background."""
@@ -571,7 +602,7 @@ def main():
         if "angles" in patterns["bullets"]:
             patterns["bullets"]["angles"] = [i*(m.pi/6) for i in range(12)]
         alive = True
-        immortel = False 
+        immortel = True 
         has_dashed = False
         compteur_dash = 120
         has_shot = False
@@ -585,6 +616,7 @@ def main():
         proj3_nb = 0
         bullet3 = 0
         pause_timer = 0
+        character = 0
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -598,6 +630,7 @@ def main():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
                 if nb_upgrade ==2:
                     if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
                         charging = True
@@ -610,6 +643,16 @@ def main():
                         has_shot = True
                         charging = False 
                         compteur_charge = 0
+                        compteur_shot = 0
+                elif character == 1:
+                    if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
+                        mouse_x = pygame.mouse.get_pos()[0]
+                        mouse_y = pygame.mouse.get_pos()[1]
+                        dx = mouse_x-rect_x
+                        dy = mouse_y - rect_y
+                        theta_b = m.atan2(dy,dx)
+                        LobstaAttack.claws.append(LobstaAttack(Vector2(rect_x+5,rect_y+5),theta_b))
+                        has_shot = True
                         compteur_shot = 0
                 else:
                     if event.type == pygame.MOUSEBUTTONDOWN and compteur_shot == 30:
@@ -969,6 +1012,9 @@ def main():
                         if obj.pos.x<410 and obj.pos.x>390 and obj.nature == RED:
                             projectile.remove(obj)
                             boss_shield +=1
+                for claw in LobstaAttack.claws:
+                    claw.update()
+                    claw.draw(fenetre)
 
                 if 0<rect_x+5<800 and 0<rect_y+5<600:
                     if check_surrounding_pixel_colors(fenetre,rect_x+5,rect_y+5,RED,10):
