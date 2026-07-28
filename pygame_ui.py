@@ -486,7 +486,7 @@ def demo():
         window.blit(ui_layer.surface, (0, 0))
         
         pygame.display.flip()
-        clock.tick(500)
+        clock.tick(60)
 
 
 if __name__=="__main__":
