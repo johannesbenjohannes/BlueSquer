@@ -616,7 +616,7 @@ def main():
         proj3_nb = 0
         bullet3 = 0
         pause_timer = 0
-        character = 0
+        character = 1
 
         # --- 3. Boucle principale ---
         game_running = True
@@ -660,7 +660,7 @@ def main():
                         mouse_y = pygame.mouse.get_pos()[1]
                         dx = mouse_x-rect_x
                         dy = mouse_y - rect_y
-                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit(), BLACK))
+                        projectile.append(Bullet(Vector2(rect_x,rect_y), Vector2(dx,dy).unit(), BLACK,6,50))
                         has_shot = True
                         compteur_shot = 0
                 if event.type == 1:

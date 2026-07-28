@@ -2,6 +2,7 @@ import pygame
 from pygame.time import Clock
 from graphics.color_palette import *
 import sys
+from pygame_ui import Panel, UILayer, Font
 cx = 40
 cy=35
 
@@ -9,22 +10,101 @@ pygame.init()
 
 
 def main():
-    fenetre = pygame.display.set_mode((70, 70))
+    fenetre = pygame.display.set_mode((800, 600))
     fenetre.fill((255,255,255))
     clock = Clock()
+    ui_layer = UILayer(fenetre)
+    mainPanel = Panel.fromLayer(ui_layer)
+    mainPanel.build([
+        {
+            "type": "FRAME",
+            "name": "main_frame",
+            "position": (.5,0,0,10),
+            "size": (1,0,1,0),
+            "anchorPoint": (.5, 0),
+            "children":[
+                  {
+                        "type": "TEXT_LABEL",
+                    "transparency": 1,
+                    "size": (1,0,0,100),
+                    "text": "Blue Squer",
+                    "font": Font(None, 60),
+                    "textColor": "black"
+                    
+                  },
+                  {
+                        "type": "TEXT_BUTTON",
+                    "name": "play1",
+                    "size": (.24,0, 0,50),
+                    "position": (0,300,0,300),
+                    "textColor": "white",
+                    "color": "blue",
+                    "transparency": 0,
+                    "font": Font(None, 35),
+                    "textAlignment": (.5, .5),
+                    "text": "REGULAR PLAY"
+                  },
+                  {
+                        "type": "TEXT_BUTTON",
+                    "name": "play2",
+                    "size": (.24,0, 0,50),
+                    "position": (0,300,0,375),
+                    "textColor": "white",
+                    "color": "blue",
+                    "transparency": 0,
+                    "font": Font(None, 35),
+                    "textAlignment": (.5, .5),
+                    "text": "SCORE PLAY"
+                  }
+            ]
+
+            }
+        ])
+    panel1 = Panel.fromLayer(ui_layer)
+    panel1.build([{
+            "type": "FRAME",
+            "name": "main_frame",
+            "position": (.5,0,0,10),
+            "size": (1,0,1,0),
+            "anchorPoint": (.5, 0),
+            "children":[{
+                  
+                    "type": "TEXT_LABEL",
+                    "transparency": 1,
+                    "size": (1,0,0,100),
+                    "text": "Character selection",
+                    "font": Font(None, 60),
+                    "textColor": "black"
+            },
+            {
+                      "type": "TEXT_BUTTON",
+                    "name": "select",
+                    "size": (.24,0, 0,50),
+                    "position": (0,300,0,300),
+                    "textColor": "white",
+                    "color": "blue",
+                    "transparency": 0,
+                    "font": Font(None, 35),
+                    "textAlignment": (.5, .5),
+                    "text": "PLAY"
+            }
+            ]
+    }
+                
+    ])
+    def displayPanel1(self):
+        mainPanel.enabled = False
+        panel1.enabled = True
+    play1 = mainPanel.descendants["play2"]
+    play1.bindAction("clicked", displayPanel1)
     while True:
         for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
         fenetre.fill((255,255,255))
-        pygame.draw.ellipse(fenetre, BLUE, (cx - 12, cy - 22, 24, 38))   # body
-        pygame.draw.ellipse(fenetre, BLUE, (cx - 30, cy - 10, 18, 12))   # left claw
-        pygame.draw.ellipse(fenetre, BLUE, (cx + 12, cy - 10, 18, 12))   # right claw
-        pygame.draw.line(fenetre, BLUE, (cx - 6, cy - 22), (cx - 20, cy - 38), 2)  # antennae
-        pygame.draw.line(fenetre, BLUE, (cx + 6, cy - 22), (cx + 20, cy - 38), 2)
-        pygame.draw.ellipse(fenetre, BLUE, (cx - 8, cy + 16, 16, 10))    # tail
-
+        ui_layer.render()
+        fenetre.blit(ui_layer.surface, (0, 0))
         pygame.display.flip()
         clock.tick(60)
 
